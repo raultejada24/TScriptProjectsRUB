@@ -1,0 +1,14 @@
+turtle.turn(90);
+turtle.move(80);
+turtle.turn(90);
+turtle.move(60);
+turtle.turn(90);
+turtle.move(80);
+turtle.turn(90);
+turtle.move(60);
+var angle = 180 / math.pi() * math.atan2(30, 40);
+var diagonal = math.sqrt(40*40 + 30*30);
+turtle.turn(90 + angle);
+turtle.move(diagonal);
+turtle.turn(-2 * angle);
+turtle.move(diagonal);
