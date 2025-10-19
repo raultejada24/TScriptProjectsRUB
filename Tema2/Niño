@@ -1,0 +1,78 @@
+# canvas size
+var w = canvas.width();
+var h = canvas.height();
+
+# sky
+canvas.setFillColor(0.7, 0.7, 1);
+canvas.clear();
+
+# sun
+canvas.setFillColor(1, 1, 0);
+canvas.fillCircle(w, 0, 100);
+canvas.setLineColor(1, 1, 0);
+canvas.setLineWidth(2);
+var angle = 175 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 165 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 155 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 145 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 135 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 125 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 115 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle = 105 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+angle =  95 * math.pi() / 180;
+canvas.line(w, 0, w + 250 * math.cos(angle), 250 * math.sin(angle));
+
+# grass
+canvas.setFillColor(0.3, 0.9, 0.3);
+canvas.fillRect(0, 400, w, h-400);
+
+# house
+canvas.setFillColor(1, 1, 1);
+canvas.fillRect(100, 300, 100, 100);
+canvas.setFillColor(0, 0, 0);
+canvas.fillRect(110, 340, 30, 60);
+canvas.fillRect(160, 340, 30, 30);
+
+# we don't have good means yet for drawing the roof
+canvas.setLineColor(1, 0, 0);
+canvas.line(90, 310, 150, 250);
+canvas.line(210, 310, 150, 250);
+
+# tree
+canvas.setFillColor(0.5, 0.3, 0);
+canvas.fillRect(295, 300, 10, 100);
+canvas.setFillColor(0.1, 0.6, 0.1);
+canvas.fillCircle(300, 250, 55);
+
+# flower
+canvas.setLineColor(0.5, 1, 0.5);
+canvas.setLineWidth(5);
+canvas.line(350, 400, 350, 350);
+canvas.setFillColor(1, 0.5, 0);
+canvas.fillCircle(350, 325, 10);
+canvas.fillCircle(350, 355, 10);
+canvas.fillCircle(338, 332, 10);
+canvas.fillCircle(338, 348, 10);
+canvas.fillCircle(362, 332, 10);
+canvas.fillCircle(362, 348, 10);
+canvas.setFillColor(1, 1, 0);
+canvas.fillCircle(350, 340, 10);
+
+# stickman
+canvas.setLineWidth(2);
+canvas.setLineColor(0.5, 0, 0.5);
+canvas.setFillColor(1, 0.5, 1);
+canvas.line(450, 360, 450, 380);
+canvas.line(450, 365, 430, 360);
+canvas.line(450, 365, 470, 360);
+canvas.line(450, 380, 440, 400);
+canvas.line(450, 380, 460, 400);
+canvas.frameCircle(450, 345, 15);

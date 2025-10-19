@@ -1,0 +1,13 @@
+var s = math.min(canvas.width(), canvas.height()) / 100;   # "percent" units
+canvas.setTextAlign("center");
+canvas.text(50*s, 5*s, "Maria");
+canvas.setLineWidth(2*s);
+canvas.setLineColor(0.5, 0, 0.5);
+canvas.setFillColor(1, 0.5, 1);
+canvas.frameRect(20*s, 80*s, 60*s, 15*s);
+canvas.line(50*s, 40*s, 50*s, 60*s);
+canvas.line(50*s, 45*s, 30*s, 40*s);
+canvas.line(50*s, 45*s, 70*s, 40*s);
+canvas.line(50*s, 60*s, 40*s, 80*s);
+canvas.line(50*s, 60*s, 60*s, 80*s);
+canvas.frameCircle(50*s, 25*s, 15*s);
