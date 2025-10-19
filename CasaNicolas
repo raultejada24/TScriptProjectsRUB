@@ -1,0 +1,17 @@
+var len = 60;
+turtle.move(len);
+turtle.turn(45);
+turtle.move(math.sqrt(0.5) * len);
+turtle.turn(90);
+turtle.move(math.sqrt(0.5) * len);
+turtle.turn(45);
+turtle.move(len);
+turtle.turn(135);
+turtle.move(math.sqrt(2) * len);
+turtle.turn(135);
+turtle.move(len);
+turtle.turn(135);
+turtle.move(math.sqrt(2) * len);
+turtle.turn(-135);
+turtle.move(len);
+

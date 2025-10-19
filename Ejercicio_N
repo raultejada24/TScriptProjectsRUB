@@ -1,0 +1,42 @@
+var points = [[0,0],[0,52],[9,52],[39,11],[39,52],[48,52],[48,0],[39,0],[9,41],[9,0],[0,0]];
+
+# Swap X and Y to make the "N" vertical
+for var i in 0:points.size()-1 do
+{
+    var temp = points[i][0];
+    points[i][0] = points[i][1];
+    points[i][1] = temp;
+}
+
+
+turtle.pen(false);
+turtle.reset(points[0][0], points[0][1], 90); # 90° = up
+turtle.pen(true);
+
+var x0; var y0; var x1; var y1;
+var dx; var dy; var length; var angle;
+
+var currentAngle = 90;
+
+for var i in 0:10 do
+{
+    x0 = points[i][0];
+    y0 = points[i][1];
+    x1 = points[i+1][0];
+    y1 = points[i+1][1];
+
+    dx = x1 - x0;
+    dy = y1 - y0;
+
+    # Calculate the length of the line (Pythagoras)
+    length = math.sqrt(dx*dx + dy*dy);
+
+    # Absolute angle from the positive X-axis
+    angle = math.atan2(dy, dx) * 180 / math.pi();
+
+    # Turn relative to the current orientation
+    turtle.turn(angle - currentAngle);
+    currentAngle = angle;
+
+    turtle.move(length);
+}
