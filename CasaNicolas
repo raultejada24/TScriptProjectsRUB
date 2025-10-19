@@ -1,10 +1,10 @@
 var len = 60;
-turtle.move(len);
-turtle.turn(45);
+turtle.move(len); # Empieza apuntando a 90° (hacia arriba)
+turtle.turn(45); # Gira 45° a la derecha respecto a su orientación actual
+turtle.move(math.sqrt(0.5) * len); # Se mueve 30
+turtle.turn(90); # Gira 90° a la derecha
 turtle.move(math.sqrt(0.5) * len);
-turtle.turn(90);
-turtle.move(math.sqrt(0.5) * len);
-turtle.turn(45);
+turtle.turn(45); # Si es positivo los grados se suman en sentido horario	
 turtle.move(len);
 turtle.turn(135);
 turtle.move(math.sqrt(2) * len);
