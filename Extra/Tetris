@@ -1,0 +1,343 @@
+# Tetris en TScript
+# Un juego completo de Tetris con controles de teclado
+
+# Constantes del juego
+var ANCHO_TABLERO = 10;
+var ALTO_TABLERO = 20;
+var TAMANO_CELDA = 30;
+var ANCHO_CANVAS = ANCHO_TABLERO * TAMANO_CELDA;
+var ALTO_CANVAS = ALTO_TABLERO * TAMANO_CELDA;
+
+# Definición de las piezas del Tetris (tetrominos)
+# Cada pieza tiene 4 rotaciones
+var piezas = [
+    # I - Pieza recta
+    [
+        [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
+        [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
+        [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]],
+        [[0,1,0,0], [0,1,0,0], [0,1,0,0], [0,1,0,0]]
+    ],
+    # O - Cuadrado
+    [
+        [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]]
+    ],
+    # T - Forma T
+    [
+        [[0,1,0,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,0,0], [0,1,1,0], [0,1,0,0], [0,0,0,0]],
+        [[0,0,0,0], [1,1,1,0], [0,1,0,0], [0,0,0,0]],
+        [[0,1,0,0], [1,1,0,0], [0,1,0,0], [0,0,0,0]]
+    ],
+    # S - Forma S
+    [
+        [[0,1,1,0], [1,1,0,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,0,0], [0,1,1,0], [0,0,1,0], [0,0,0,0]],
+        [[0,0,0,0], [0,1,1,0], [1,1,0,0], [0,0,0,0]],
+        [[1,0,0,0], [1,1,0,0], [0,1,0,0], [0,0,0,0]]
+    ],
+    # Z - Forma Z
+    [
+        [[1,1,0,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,0,1,0], [0,1,1,0], [0,1,0,0], [0,0,0,0]],
+        [[0,0,0,0], [1,1,0,0], [0,1,1,0], [0,0,0,0]],
+        [[0,1,0,0], [1,1,0,0], [1,0,0,0], [0,0,0,0]]
+    ],
+    # J - Forma J
+    [
+        [[1,0,0,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,1,0], [0,1,0,0], [0,1,0,0], [0,0,0,0]],
+        [[0,0,0,0], [1,1,1,0], [0,0,1,0], [0,0,0,0]],
+        [[0,1,0,0], [0,1,0,0], [1,1,0,0], [0,0,0,0]]
+    ],
+    # L - Forma L
+    [
+        [[0,0,1,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+        [[0,1,0,0], [0,1,0,0], [0,1,1,0], [0,0,0,0]],
+        [[0,0,0,0], [1,1,1,0], [1,0,0,0], [0,0,0,0]],
+        [[1,1,0,0], [0,1,0,0], [0,1,0,0], [0,0,0,0]]
+    ]
+];
+
+# Colores para cada tipo de pieza
+var colores = [
+    [0, 1, 1],      # Cyan - I
+    [1, 1, 0],      # Amarillo - O
+    [0.5, 0, 0.5],  # Púrpura - T
+    [0, 1, 0],      # Verde - S
+    [1, 0, 0],      # Rojo - Z
+    [0, 0, 1],      # Azul - J
+    [1, 0.5, 0]     # Naranja - L
+];
+
+# Variables del juego
+var tablero = [];
+var piezaActual = null;
+var tipoPieza = 0;
+var rotacion = 0;
+var posX = 0;
+var posY = 0;
+var puntuacion = 0;
+var juegoTerminado = false;
+var velocidad = 200000;  # milisegundos entre caídas (mucho más lento)
+var ultimaCaida = 0;
+
+# Inicializar el tablero vacío
+function inicializarTablero() {
+    tablero = [];
+    for var i in 0:ALTO_TABLERO do {
+        var fila = [];
+        for var j in 0:ANCHO_TABLERO do {
+            fila.push(0);
+        }
+        tablero.push(fila);
+    }
+}
+
+# Crear una nueva pieza aleatoria
+function nuevaPieza() {
+    tipoPieza = Integer(math.random() * 7);
+    rotacion = 0;
+    piezaActual = piezas[tipoPieza][rotacion];
+    posX = Integer(ANCHO_TABLERO / 2) - 2;
+    posY = 0;
+    
+    # Verificar si hay espacio para la nueva pieza
+    if colisiona(piezaActual, posX, posY) then {
+        juegoTerminado = true;
+    }
+}
+
+# Verificar colisión
+function colisiona(pieza, x, y) {
+    for var i in 0:4 do {
+        for var j in 0:4 do {
+            if pieza[i][j] != 0 then {
+                var nuevoX = x + j;
+                var nuevoY = y + i;
+                
+                # Verificar límites
+                if nuevoX < 0 or nuevoX >= ANCHO_TABLERO or nuevoY >= ALTO_TABLERO then {
+                    return true;
+                }
+                
+                # Verificar colisión con piezas existentes
+                if nuevoY >= 0 and tablero[nuevoY][nuevoX] != 0 then {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+# Fijar la pieza actual en el tablero
+function fijarPieza() {
+    for var i in 0:4 do {
+        for var j in 0:4 do {
+            if piezaActual[i][j] != 0 then {
+                var y = posY + i;
+                var x = posX + j;
+                if y >= 0 and y < ALTO_TABLERO and x >= 0 and x < ANCHO_TABLERO then {
+                    tablero[y][x] = tipoPieza + 1;
+                }
+            }
+        }
+    }
+    eliminarLineasCompletas();
+    nuevaPieza();
+}
+
+# Eliminar líneas completas
+function eliminarLineasCompletas() {
+    var lineasEliminadas = 0;
+    var i = ALTO_TABLERO - 1;
+    
+    while i >= 0 do {
+        var lineaCompleta = true;
+        for var j in 0:ANCHO_TABLERO do {
+            if tablero[i][j] == 0 then {
+                lineaCompleta = false;
+                break;
+            }
+        }
+        
+        if lineaCompleta then {
+            lineasEliminadas = lineasEliminadas + 1;
+            # Eliminar la línea y mover todo hacia abajo
+            tablero.remove(i);
+            var nuevaLinea = [];
+            for var j in 0:ANCHO_TABLERO do {
+                nuevaLinea.push(0);
+            }
+            tablero.insert(0, nuevaLinea);
+        } else {
+            i = i - 1;
+        }
+    }
+    
+    if lineasEliminadas > 0 then {
+        puntuacion = puntuacion + lineasEliminadas * lineasEliminadas * 100;
+    }
+}
+
+# Mover la pieza
+function moverIzquierda() {
+    if not colisiona(piezaActual, posX - 1, posY) then {
+        posX = posX - 1;
+    }
+}
+
+function moverDerecha() {
+    if not colisiona(piezaActual, posX + 1, posY) then {
+        posX = posX + 1;
+    }
+}
+
+function moverAbajo() {
+    if not colisiona(piezaActual, posX, posY + 1) then {
+        posY = posY + 1;
+        return true;
+    } else {
+        fijarPieza();
+        return false;
+    }
+}
+
+function rotar() {
+    var nuevaRotacion = (rotacion + 1) % 4;
+    var nuevaPieza = piezas[tipoPieza][nuevaRotacion];
+    
+    if not colisiona(nuevaPieza, posX, posY) then {
+        rotacion = nuevaRotacion;
+        piezaActual = nuevaPieza;
+    }
+}
+
+function caerRapido() {
+    while moverAbajo() do { }
+}
+
+# Dibujar el juego
+function dibujar() {
+    # Configurar canvas
+    canvas.setFillColor(0, 0, 0);
+    canvas.fillRect(0, 0, ANCHO_CANVAS, ALTO_CANVAS);
+    
+    # Dibujar el tablero
+    for var i in 0:ALTO_TABLERO do {
+        for var j in 0:ANCHO_TABLERO do {
+            if tablero[i][j] != 0 then {
+                var tipo = tablero[i][j] - 1;
+                canvas.setFillColor(colores[tipo][0], colores[tipo][1], colores[tipo][2]);
+                canvas.fillRect(j * TAMANO_CELDA, i * TAMANO_CELDA, 
+                              TAMANO_CELDA - 1, TAMANO_CELDA - 1);
+            }
+        }
+    }
+    
+    # Dibujar la pieza actual
+    if piezaActual != null then {
+        canvas.setFillColor(colores[tipoPieza][0], colores[tipoPieza][1], colores[tipoPieza][2]);
+        for var i in 0:4 do {
+            for var j in 0:4 do {
+                if piezaActual[i][j] != 0 then {
+                    var x = (posX + j) * TAMANO_CELDA;
+                    var y = (posY + i) * TAMANO_CELDA;
+                    canvas.fillRect(x, y, TAMANO_CELDA - 1, TAMANO_CELDA - 1);
+                }
+            }
+        }
+    }
+    
+    # Dibujar cuadrícula
+    canvas.setLineColor(0.3, 0.3, 0.3);
+    for var i in 0:(ANCHO_TABLERO+1) do {
+        canvas.line(i * TAMANO_CELDA, 0, i * TAMANO_CELDA, ALTO_CANVAS);
+    }
+    for var i in 0:(ALTO_TABLERO+1) do {
+        canvas.line(0, i * TAMANO_CELDA, ANCHO_CANVAS, i * TAMANO_CELDA);
+    }
+    
+    # Mostrar mensaje de game over
+    if juegoTerminado then {
+        canvas.setFillColor(0, 0, 0);
+        canvas.fillRect(0, ALTO_CANVAS / 2 - 40, ANCHO_CANVAS, 80);
+        canvas.setFillColor(1, 0, 0);
+        canvas.fillRect(ANCHO_CANVAS / 2 - 100, ALTO_CANVAS / 2 - 20, 200, 60);
+    }
+}
+
+# Actualizar el juego
+function actualizar() {
+    if not juegoTerminado then {
+        var tiempoActual = time();
+        if tiempoActual - ultimaCaida > velocidad / 1000 then {
+            moverAbajo();
+            ultimaCaida = tiempoActual;
+        }
+    }
+}
+
+# Manejo de teclado
+function onKeyDown(event) {
+    if juegoTerminado then {
+        if event.key == "r" or event.key == "R" then {
+            # Reiniciar el juego
+            inicializarTablero();
+            puntuacion = 0;
+            juegoTerminado = false;
+            nuevaPieza();
+        }
+        return;
+    }
+    
+    if event.key == "ArrowLeft" then {
+        moverIzquierda();
+    }
+    else if event.key == "ArrowRight" then {
+        moverDerecha();
+    }
+    else if event.key == "ArrowDown" then {
+        moverAbajo();
+    }
+    else if event.key == "ArrowUp" then {
+        rotar();
+    }
+    else if event.key == " " then {
+        caerRapido();
+    }
+}
+
+# Inicializar el juego
+inicializarTablero();
+nuevaPieza();
+ultimaCaida = time();
+
+# Instrucciones iniciales
+print("¡Bienvenido al Tetris!");
+print("Usa las flechas para mover, flecha arriba para rotar");
+print("Espacio para caída rápida, R para reiniciar");
+
+# Registrar eventos
+setEventHandler("canvas.keydown", onKeyDown);
+
+# Bucle principal del juego
+function mainLoop() {
+    actualizar();
+    dibujar();
+    wait(0.016);  # ~60 FPS
+    if not juegoTerminado then {
+        mainLoop();
+    } else {
+        # Seguir dibujando para mostrar game over
+        dibujar();
+        wait(0.1);
+        mainLoop();
+    }
+}
+
+mainLoop();
