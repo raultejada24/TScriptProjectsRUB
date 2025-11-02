@@ -1,0 +1,42 @@
+var arr = ["Hola", "Studium ist schwer;", "lernen macht Spaß", "Test;", "Keine Schlüsselwörter"];
+
+print("Original array:");
+print(arr);
+
+# Separar cadenas con ';' y normales
+var normal = [];
+var semicolon = [];
+
+for var i in 0:arr.size() do
+{
+	var s = arr[i];
+	if (s.find("Studium") != null or s.find("lernen") != null) then
+	{
+		if (s[s.size() - 1] == ";") then
+			semicolon.push(s);
+		else
+			normal.push(s);
+	}
+}
+
+print("Normal strings:");
+print(normal);
+
+print("Strings ending with ';':");
+print(semicolon);
+
+# Vaciar el array original
+if (arr.size() > 0) then
+	arr.remove(0:arr.size());
+
+# Añadir de nuevo
+for var i in 0:normal.size() do
+	arr.push(normal[i]);
+for var i in 0:semicolon.size() do
+	arr.push(semicolon[i]);
+
+print("Modified original array:");
+print(arr);
+
+print("Number of strings ending with ';':");
+print(semicolon.size());

@@ -1,0 +1,42 @@
+function processArray(arr)
+{
+	var normal = [];
+	var semicolon = [];
+	# Iterate over original array
+	for var i in 0:arr.size() do
+	{
+		var s = arr[i];
+		# Only keep strings that contain any of the keywords
+		if (s.find("Studium") != null or s.find("lernen") != null or s.find("schwierig") != null) then
+		{
+			# If string ends with ';', put it in semicolon array
+			if (s.size() > 0 and s[s.size() - 1] == 59) then
+				semicolon.push(s);
+			else
+				normal.push(s);
+		}
+	}
+	# Clear the original array
+	while arr.size() > 0 do
+		arr.remove(0);
+	# Push normal strings first
+	for var i in 0:normal.size() do
+		arr.push(normal[i]);
+	# Push strings ending with ';' at the end
+	for var i in 0:semicolon.size() do
+		arr.push(semicolon[i]);
+	# Return number of strings ending with ';'
+	return semicolon.size();
+}
+
+var arr = [
+	"[/]",
+	"Mein Studium ist schwierig;",
+	"Jetzt lernen; Ach nein :)",
+	"",
+	"Aktivität: lernen",
+	"Dies ist ein Test. Hmmm;",
+];
+print(processArray(arr)); 
+print(arr);
+

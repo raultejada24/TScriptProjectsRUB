@@ -1,0 +1,22 @@
+function pattern(w, h)
+{
+	var count = 0;          
+	
+	for var y in 0:h do
+	{
+		for var x in 0:w do
+		{
+			if ((x * y) % 7 == 2) then
+			{
+				canvas.fillRect(10 * x, 10 * y, 10, 10);
+				count = count + 1;
+			}
+		}
+	}
+	
+	return count;
+}
+
+pattern(5,5);
+pattern(3,0);
+pattern(0,2);
