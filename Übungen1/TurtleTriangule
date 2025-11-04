@@ -1,0 +1,37 @@
+var a = 25;
+var b = 40;
+
+# Calculate hypotenuse
+var c = math.sqrt(a*a + b*b);
+
+# From radians to degrees
+var beta = math.asin(b/c) * (180 / math.pi());
+var alpha = math.asin(a/c) * (180 / math.pi());
+
+print("a: " + a);
+print("b: " + b);
+print("c: " + c);
+print("alpha: " + alpha);
+print("beta: " + beta);
+
+# --- Draw triangle ---
+
+# Set color to red for the hypotenuse
+turtle.color(1, 0, 0);
+turtle.move(c);
+
+# Turn at the outer angle of beta
+turtle.turn(180 - beta);
+
+# Set color to green for side a
+turtle.color(0, 1, 0);
+turtle.move(a);
+
+# Turn 90° (right angle)
+turtle.turn(90);
+
+# Set color to blue for side b
+turtle.color(0, 0, 1);
+turtle.move(b);
+
+

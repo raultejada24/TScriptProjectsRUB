@@ -1,0 +1,71 @@
+# a) Save and print width and height from canvas
+var W = canvas.width();
+var H = canvas.height();
+print("a) Canvas width: " + W);
+print("a) Canvas height: " + H);
+
+# b) Draw city limits: Red Circle, 3pxLineWidth touching extrems on right and left
+var centerX = W / 2;
+var centerY = H / 2;
+var cityRadius = W / 2;      
+
+
+canvas.setLineWidth(3);
+canvas.setLineColor(1, 0, 0);
+canvas.circle(centerX, centerY, cityRadius);
+
+# c) RATHAUS: Blue square center of canvas
+var hallSize = 100;
+
+canvas.setFillColor(0, 0, 1);     # azul
+canvas.setLineColor(1, 0, 0);     # borde rojo
+canvas.frameRect(centerX - hallSize/2, centerY - hallSize/2, hallSize, hallSize);
+
+# d) BÜRGERZENTREN: Four green circles on North, South, East and West
+var radiusCenter = 20;
+
+# Coordinates
+var northX = centerX;
+var northY = (centerY - cityRadius + centerY) / 2;
+var southX = centerX;
+var southY = (centerY + cityRadius + centerY) / 2;
+var eastX = (centerX + cityRadius + centerX) / 2;
+var eastY = centerY;
+var westX = (centerX - cityRadius + centerX) / 2;
+var westY = centerY;
+
+# e) Streets (grey lines): Connect Rathaus with each cardinal points
+canvas.setLineColor(0.5, 0.5, 0.5); # grey
+canvas.setLineWidth(6);
+canvas.line(centerX, centerY, northX, northY);
+canvas.line(centerX, centerY, southX, southY);
+canvas.line(centerX, centerY, eastX, eastY);
+canvas.line(centerX, centerY, westX, westY);
+
+# d) Draw each Bürgerzentren
+canvas.setFillColor(0, 1, 0);     # green
+canvas.fillCircle(northX, northY, radiusCenter);
+canvas.fillCircle(southX, southY, radiusCenter);
+canvas.fillCircle(eastX, eastY, radiusCenter);
+canvas.fillCircle(westX, westY, radiusCenter);
+
+# g) NAME OF THE CITY: Centered on the Rathaus
+
+canvas.setFillColor(1, 0, 0);
+canvas.setFont("Helvetica", 20);
+canvas.setTextAlign("center");
+canvas.text(centerX, centerY - hallSize/2 + 15, "Madrid");
+
+# h) KRANKENHAUS: Red cross (dos rectángulos superpuestos)
+var hospitalX = centerX + 90;
+var hospitalY = centerY - 70;
+
+canvas.setFillColor(1, 0, 0);
+
+# Vertical arma
+canvas.fillRect(hospitalX - 5, hospitalY - 15, 10, 30);
+# Horizontal Arm
+canvas.fillRect(hospitalX - 15, hospitalY - 5, 30, 10);
+
+print("Draw finished. You can change hospitalX/Y for moving the Krankerhaus.");
+
