@@ -1,0 +1,223 @@
+# TScript - Übungsblatt 1 - Kollisionserkennung und elastischer Stoß
+
+# ==========================
+# a) Guardar ancho y alto del canvas
+# ==========================
+var W = canvas.width();    # ancho del canvas
+var H = canvas.height();   # alto del canvas
+print("a) Canvas width: " + W);
+print("a) Canvas height: " + H);
+
+# ==========================
+# b) Dibujar fondo blanco con frameRect (usamos fillRect para rellenar)
+# ==========================
+# Usamos un rectángulo blanco que cubre todo el canvas
+canvas.setFillColor(1, 1, 1);              # blanco
+canvas.fillRect(0, 0, W, H);
+
+# ==========================
+# c) Dibujar una plataforma que ocupe todo el ancho
+# ==========================
+# Definimos la altura de la plataforma (en px)
+var platformHeight = 20;                   # altura total de la plataforma
+# Dibujamos la plataforma en la parte inferior del canvas
+var platformTopY = H - platformHeight;     # y de la arista superior de la plataforma
+canvas.setFillColor(0, 1, 0);        
+canvas.fillRect(0, platformTopY, W, platformHeight);
+
+# ==========================
+# d) Guardar la altura de la arista superior de la plataforma en una variable
+# (ya la hemos guardado en platformTopY) y usarla para dibujar - ya hecho arriba
+# ==========================
+
+# ==========================
+# e) Dibujar dos cuadrados sobre la plataforma
+#    - Usamos variables para x centrales y tamaños
+#    - Aseguramos que no se solapen y no toquen las paredes
+# ==========================
+# Tamaños de los cuadrados (diferentes para permitir masa distinta)
+var s1 = 40;    # tamaño cuadrado 1 (px)
+var s2 = 70;    # tamaño cuadrado 2 (px)
+
+# Posiciones x de las centros (iniciales) - las situamos separados y dentro de los límites
+# Aseguramos que el cuadrado no toque las paredes: x centro en [s/2, W - s/2]
+var x1 = 150;   # centro del cuadrado 1
+var x2 = 400;   # centro del cuadrado 2
+
+# Posición y (usamos la arista superior de la plataforma para que reposen sobre ella)
+# Si top de la plataforma es platformTopY, entonces la coordenada y del borde superior del cuadrado
+# será platformTopY - s; si dibujamos con fillRect(xTop, yTop, w, h) usamos ese valor.
+var yTop1 = platformTopY - s1;   # y de la esquina superior izquierda del cuadrado 1
+var yTop2 = platformTopY - s2;   # y de la esquina superior izquierda del cuadrado 2
+
+# ==========================
+# f) Variables de velocidad para cada cuadrado (comenzamos con +1 y -1)
+# ==========================
+var v1 = 1;    # velocidad en px por iteración, cuadrado 1 (se mueve hacia la derecha)
+var v2 = -1;   # velocidad en px por iteración, cuadrado 2 (se mueve hacia la izquierda)
+
+# ==========================
+# l) Definimos la función checkForCollision(x1, x2, distance)
+#     - Esta función comprueba si la distancia absoluta entre x1 y x2 es menor o igual
+#       a la distancia dada (por ejemplo suma de semianchos para cuadrados)
+# ==========================
+function checkForCollision(cx1, cx2, distance)
+{
+    # usamos math.abs para el valor absoluto
+    if math.abs(cx1 - cx2) <= distance then
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+# ==========================
+# s) Función para calcular la velocidad resultado de un choque elástico
+#    según la fórmula dada en el enunciado:
+#    v1' = (m1*v1 + m2*(2*v2 - v1)) / (m1 + m2)
+#    m_i = s_i^3
+#    Devolvemos ambas velocidades nuevas en un array [v1prime, v2prime]
+# ==========================
+function elasticCollision(v1_before, v2_before, s1, s2)
+{
+    var m1 = math.pow(s1, 3);
+    var m2 = math.pow(s2, 3);
+
+    # Fórmulas equivalentes para v1' y v2'
+    var v1_after = (m1 * v1_before + m2 * (2 * v2_before - v1_before)) / (m1 + m2);
+    var v2_after = (m2 * v2_before + m1 * (2 * v1_before - v2_before)) / (m1 + m2);
+
+    return [v1_after, v2_after];
+}
+
+# ==========================
+# g,h) Bucle principal: loop que hace 1000 iteraciones
+#     - Usamos for con rango 0:999 para tener exactamente 1000 iteraciones
+# ==========================
+for var step in 0:999 do
+{
+    # ==========================
+    # i) Orden de operaciones dentro del bucle:
+    # 1) Pintar fondo (borrar frame con fondo blanco)
+    # 2) Dibujar plataforma
+    # 3) Dibujar cuadrados en sus posiciones actuales
+    # 4) Esperar (wait(10))
+    # 5) Actualizar posiciones sumando velocidad
+    # 6) Comprobar colisiones entre cuadrados y con paredes
+    # ==========================
+
+    # 1) Repintar fondo (limpiar)
+    canvas.setFillColor(1, 1, 1);
+    canvas.fillRect(0, 0, W, H);
+
+    # 2) Dibujar plataforma
+    canvas.setFillColor(0	, 1, 0);
+    canvas.fillRect(0, platformTopY, W, platformHeight);
+
+    # 3) Dibujar cuadrados en posiciones actuales
+    # Convertir centro x a esquina superior izquierda para fillRect:
+    var x1_topLeft = x1 - s1 / 2;
+    var x2_topLeft = x2 - s2 / 2;
+
+    # Dibujar cuadrado 1
+    canvas.setFillColor(0, 0, 1);    # azul
+    canvas.fillRect(x1_topLeft, yTop1, s1, s1);
+
+    # Dibujar cuadrado 2
+    canvas.setFillColor(1, 0, 0);    # rojo
+    canvas.fillRect(x2_topLeft, yTop2, s2, s2);
+
+    # 4) Pausa breve para ver la animación (10 ms)
+    wait(10);
+
+    # 5) Actualizar posiciones
+    x1 = x1 + v1;
+    x2 = x2 + v2;
+
+    # 6) Comprobar colisiones con paredes (paredes verticales izquierda x=0 y derecha x=W)
+    # Para evitar que el centro salga del límite, comprobamos con semiancho (s/2)
+
+    # Pared izquierda para cuadrado 1
+    if x1 - s1/2 <= 0 then
+    {
+        # Rebote en la pared: invertimos la velocidad
+        x1 = s1/2;    # reposicionamos justo en el límite (evita penetración)
+        v1 = -v1;
+    }
+
+    # Pared derecha para cuadrado 1
+    if x1 + s1/2 >= W then
+    {
+        x1 = W - s1/2;
+        v1 = -v1;
+    }
+
+    # Pared izquierda para cuadrado 2
+    if x2 - s2/2 <= 0 then
+    {
+        x2 = s2/2;
+        v2 = -v2;
+    }
+
+    # Pared derecha para cuadrado 2
+    if x2 + s2/2 >= W then
+    {
+        x2 = W - s2/2;
+        v2 = -v2;
+    }
+
+    # ==========================
+    # m,o) Comprobar colisión entre los dos cuadrados
+    #      Distancia de colisión = semiancho1 + semiancho2
+    # ==========================
+    var collisionDistance = s1/2 + s2/2;
+    if checkForCollision(x1, x2, collisionDistance) then
+    {
+        # Para evitar múltiples detecciones en iteraciones consecutivas (penetración),
+        # movemos ligeramente los cuadrados separándolos según su signo de velocidad
+        # Calculamos overlapping (cuánto se han penetrado)
+        var overlap = collisionDistance - math.abs(x1 - x2);
+        if overlap < 0 then
+        {
+            overlap = 0; # seguridad
+        }
+
+        # Separar los cuadrados la mitad cada uno según la dirección
+        if x1 < x2 then
+        {
+            x1 = x1 - overlap/2;
+            x2 = x2 + overlap/2;
+        }
+        else
+        {
+            x1 = x1 + overlap/2;
+            x2 = x2 - overlap/2;
+        }
+
+        # Ahora calculamos las nuevas velocidades después del choque elástico
+        var newVs = elasticCollision(v1, v2, s1, s2);
+        v1 = newVs[0];
+        v2 = newVs[1];
+
+        # Nota: con esta implementación permitimos que si los cuadrados vuelven a colisionar
+        # en la siguiente iteración, se recalculen de nuevo. La separación previa reduce
+        # la probabilidad de colisiones repetidas indeseadas.
+    }
+
+    # Fin del bucle de actualización de paso
+}
+
+# ==========================
+# Comentarios finales y comprobaciones
+# ==========================
+print("Simulación finalizada (1000 pasos). Valores finales:");
+print("x1=" + x1 + " v1=" + v1 + " s1=" + s1);
+print("x2=" + x2 + " v2=" + v2 + " s2=" + s2);
+
+# Puedes ajustar s1, s2, velocidades iniciales v1/v2 o platformHeight para experimentar.
+# También puedes aumentar el número de pasos cambiando el rango del for.
+# --------------------------------------------------------------
+# Fin del script
