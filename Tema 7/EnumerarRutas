@@ -1,0 +1,71 @@
+# Bitte verändern Sie diese Klasse nicht!
+class Node
+{
+public:
+	constructor(color_, edges_)
+	{
+		color = color_;
+		edges = edges_;
+	}
+	var color;
+	var edges;
+}
+
+function listPaths(graph)
+{
+	# Caso base: grafo vacío
+	if graph.size() == 0 then
+		return [];
+	
+	# Caso recursivo: separar último nodo
+	var n = graph.size();
+	var lastIndex = n - 1;
+	var lastNode = graph[lastIndex];
+	
+	# Crear subgrafo sin el último nodo (primeros n-1 nodos)
+	var subgraph = [];
+	for var i in 0:lastIndex do
+		subgraph.push(graph[i]);
+	
+	# Llamada recursiva con n-1 nodos
+	var subpaths = listPaths(subgraph);
+	
+	# Array resultado
+	var result = [];
+	
+	# Categoría 1: Todos los caminos sin el último nodo
+	for var i in 0:subpaths.size() do
+	{
+		var path = Array(subpaths[i]);
+		result.push(path);
+	}
+	
+	# Solo si el último nodo NO es black:
+	if lastNode.color != "black" then
+	{
+		# Categoría 2: Extender caminos que tengan arista hacia lastIndex
+		for var i in 0:subpaths.size() do
+		{
+			var path = subpaths[i];
+			var lastNodeInPath = path[path.size() - 1];
+			var nodeInGraph = graph[lastNodeInPath];
+			
+			# Verificar si hay arista desde ese nodo hacia lastIndex
+			for var j in 0:nodeInGraph.edges.size() do
+			{
+				if nodeInGraph.edges[j] == lastIndex then
+				{
+					var extendedPath = Array(path);
+					extendedPath.push(lastIndex);
+					result.push(extendedPath);
+					break;
+				}
+			}
+		}
+		
+		# Categoría 3: El camino que solo contiene el último nodo
+		result.push([lastIndex]);
+	}
+	
+	return result;
+}
