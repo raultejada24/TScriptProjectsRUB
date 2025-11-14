@@ -1,0 +1,12 @@
+function factorial(n)
+{
+	if Type(n) != Integer then
+		error("factorial expects an integer");
+	if n < 0 then
+		error("factorial expects n >= 0");
+	var f = 1;
+	for var k in 1:n+1 do f *= k;
+	assert(f >= 1);     # sanity check
+	return f;
+}
+print(factorial(17));
