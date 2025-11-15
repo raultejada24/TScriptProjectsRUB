@@ -1,0 +1,78 @@
+# global drawing scale
+var cx = canvas.width() / 2;
+var cy = canvas.height() / 2;
+var radius = 0.95 * math.min(cx, cy);
+
+# Draw a "radial" line in the direction given by angle from
+# radius a to radius b, given as fractions of the clock radius.
+function rline(angle, a, b)
+{
+	var c = math.cos(angle);
+	var s = math.sin(angle);
+	canvas.line(cx + radius * a * s, cy - radius * a * c, cx + radius * b * s, cy - radius * b * c);
+}
+
+# Draw an analog clock outline.
+function drawClock()
+{
+	use namespace canvas;
+
+	setFillColor(0.8, 0.8, 0.8);
+	clear();
+	setFillColor(1, 1, 1);
+	fillCircle(cx, cy, 1.02 * radius);
+	setLineColor(0, 0, 0);
+	setLineWidth(0.01 * radius);
+	for var i in 0:60 do
+	{
+		var len = 0.05;
+		if i % 5 == 0 then len = 0.1;
+		rline(i * math.pi() / 30, 1-len, 1);
+	}
+}
+
+# Draw the hands (hour/minute/second).
+function draw(h, m, s)
+{
+	use namespace canvas;
+
+	var pi = math.pi();
+	setFillColor(1, 1, 1);
+	fillCircle(cx, cy, 0.88 * radius);
+	setLineColor(0, 0, 0);
+	setLineWidth(0.03 * radius);
+	rline((h + m/60 + s/3600) / 6 * pi, 0, 0.65);   # hours hand moves smoothly
+	setLineWidth(0.02 * radius);
+	rline(m / 30 * pi, 0, 0.8);                     # minutes hand moves in "ticks"
+	setFillColor(0, 0, 0);
+	fillCircle(cx, cy, 0.03 * radius);
+	setFillColor(1, 0, 0);
+	fillCircle(cx, cy, 0.015 * radius);
+	setLineColor(1, 0, 0);
+	setLineWidth(0.01 * radius);
+	rline(s / 30 * pi, 0, 0.85);                    # seconds hand moves in "ticks"
+}
+
+# Main "timer" loop: redraw the hands each second
+var previous = 0;
+setEventHandler("timer", function(event)
+{
+	var now = math.floor(localtime() / 1000);   # seconds since midnight 01.01.1970 in local time
+	if now == previous then return;
+	var s = now % 60;
+	var m = (now // 60) % 60;
+	var h = (now // 3600) % 24;
+	draw(h, m, s);
+});
+
+# redraw the whole click on resize
+setEventHandler("canvas.resize", function(event)
+{
+	cx = event.width / 2;
+	cy = event.height / 2;
+	radius = 0.95 * math.min(cx, cy);
+	drawClock();
+});
+
+drawClock();
+enterEventMode();
