@@ -1,0 +1,32 @@
+function createWave(amplitude)
+{
+    var a = amplitude;
+    return function[a](n)
+    {
+        for var i in 0:n do
+        {
+            turtle.move(a);
+            turtle.turn(90);
+            turtle.move(7);
+            turtle.turn(90);
+            turtle.move(a);
+            turtle.turn(-90);
+            turtle.move(7);
+            turtle.turn(-90);
+        }
+    };
+}
+
+canvas.setFillColor(1, 1, 1);
+canvas.clear();
+
+turtle.reset(-80, 0, 0, true);
+turtle.color(0, 0, 1);
+
+var wave = createWave(30);
+wave(4);
+
+canvas.setFillColor(0, 0, 0);
+canvas.setFont("Arial", 14);
+canvas.text(10, 20, "Rechteckschwingung: 4 Perioden, Amplitude = 30");
+canvas.text(10, 40, "Wellenlaenge = 14 (7 + 7)");
