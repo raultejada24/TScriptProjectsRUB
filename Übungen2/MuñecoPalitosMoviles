@@ -1,0 +1,234 @@
+# TScript - Übungsblatt 2 - Container und Datentypen - Bewegliche Strichmännchen
+var W = canvas.width();
+var H = canvas.height();
+
+# Definimos la plataforma donde estarán los Strichmännchen
+var platformHeight = 20;
+var platformTopY = H - platformHeight;
+
+# ==========================
+# a) Función para dibujar un Strichmännchen en una posición específica
+#    (Copiada de la Musterlösung proporcionada)
+# ==========================
+function drawStickman(x, y)
+{
+    canvas.setLineColor(0.5, 0, 0.5);    # color de línea morado
+    canvas.setFillColor(1, 0.5, 1);      # color de relleno rosa
+    canvas.line(x, y, x, y+10);          # cuerpo vertical
+    canvas.line(x, y+2, x-10, y);        # brazo izquierdo
+    canvas.line(x, y+2, x+10, y);        # brazo derecho
+    canvas.line(x, y+10, x-5, y+20);     # pierna izquierda
+    canvas.line(x, y+10, x+5, y+20);     # pierna derecha
+    canvas.frameCircle(x, y-8, 8);       # cabeza (círculo con marco)
+}
+
+# ==========================
+# b) Discusión sobre Container:
+#    - Array: homogéneo, bueno para colecciones de mismo tipo (números, strings)
+#    - Dictionary: heterogéneo, bueno para pares clave-valor
+#    - Clase: heterogéneo, estructura con atributos nombrados y métodos
+#    
+#    Para almacenar el estado de un Strichmännchen (x, y, velocidad, etc.)
+#    una CLASE es la mejor opción porque:
+#    - Permite agrupar datos heterogéneos (números, booleanos)
+#    - Da nombres significativos a cada atributo (x, y, walk_speed...)
+#    - Permite añadir métodos más adelante si es necesario
+#    - Facilita la lectura y mantenimiento del código
+# ==========================
+
+# ==========================
+# c) Definición de la clase Stickman con atributos x e y
+# d) Constructor que recibe valores para x e y
+# k) Añadimos atributo walk_speed para la dirección de movimiento
+# l) Constructor con parámetro opcional para walk_speed (default 0)
+# m) Añadimos atributos is_jumping y dir_y para el salto
+# ==========================
+class Stickman
+{
+public:
+    var x;              # posición horizontal (centro del muñeco)
+    var y;              # posición vertical (punto de referencia del cuerpo)
+    var walk_speed;     # velocidad de caminar (+1 derecha, -1 izquierda, 0 quieto)
+    var is_jumping;     # booleano: si el muñeco está saltando
+    var dir_y;          # velocidad vertical (para simular salto con gravedad)
+    
+    # Constructor con parámetros opcionales
+    # Parámetros obligatorios: pos_x, pos_y
+    # Parámetros opcionales: speed (default 0), jumping (default false)
+    constructor(pos_x, pos_y, speed = 0, jumping = false)
+    {
+        this.x = pos_x;
+        this.y = pos_y;
+        this.walk_speed = speed;
+        this.is_jumping = jumping;
+        this.dir_y = 0;  # siempre inicializado en 0 (no hay movimiento vertical al inicio)
+    }
+}
+
+# ==========================
+# e) Crear una instancia de prueba de la clase Stickman
+# f) Dibujar el Strichmännchen usando sus atributos
+# ==========================
+# Ejemplo simple (comentado porque luego usaremos el array):
+# var testMan = Stickman(200, platformTopY - 30);
+# drawStickman(testMan.x, testMan.y);
+
+# ==========================
+# g) Container para almacenar múltiples Strichmännchen:
+#    Un ARRAY es perfecto porque:
+#    - Todos los elementos son del mismo tipo (instancias de Stickman)
+#    - Podemos iterar fácilmente con un bucle for
+#    - Mantiene el orden de inserción
+#    - Acceso rápido mediante índices
+# ==========================
+
+# ==========================
+# h) Crear array con al menos 5 Strichmännchen
+#    Todos tienen la misma coordenada y (sobre la plataforma)
+# l) Algunos con diferentes velocidades para que caminen
+# m) Algunos configurados para saltar
+# o) Probamos TODAS las combinaciones posibles de comportamientos
+# ==========================
+var stickmen = [];  # array vacío para guardar los Strichmännchen
+
+# Altura común para todos (justo sobre la plataforma)
+# Consideramos que el muñeco mide aprox 30px de alto (de y-8 hasta y+20)
+var commonY = platformTopY - 30;
+
+# Creamos 7 Strichmännchen con TODAS las combinaciones posibles:
+
+# 1. Quieto, NO salta (walk_speed = 0, is_jumping = false)
+stickmen.push(Stickman(80, commonY, 0, false));
+
+# 2. Camina derecha, NO salta (walk_speed = 1, is_jumping = false)
+stickmen.push(Stickman(160, commonY, 1, false));
+
+# 3. Camina izquierda, NO salta (walk_speed = -1, is_jumping = false)
+stickmen.push(Stickman(240, commonY, -1, false));
+
+# 4. Quieto, SÍ salta (walk_speed = 0, is_jumping = true)
+stickmen.push(Stickman(320, commonY, 0, true));
+
+# 5. Camina derecha, SÍ salta (walk_speed = 1, is_jumping = true)
+stickmen.push(Stickman(400, commonY, 1, true));
+
+# 6. Camina izquierda, SÍ salta (walk_speed = -1, is_jumping = true)
+stickmen.push(Stickman(480, commonY, -1, true));
+
+# 7. Camina más rápido a la derecha, NO salta (walk_speed = 2, is_jumping = false)
+stickmen.push(Stickman(560, commonY, 2, false));
+
+# ==========================
+# j) Bucle principal de animación
+#    - Limpia el canvas con canvas.clear()
+#    - Dibuja la plataforma
+#    - Dibuja todos los Strichmännchen
+#    - Actualiza posiciones según walk_speed
+#    - Implementa la física del salto
+#    - Espera 10ms con wait(10)
+# ==========================
+for var frame in 0:999 do  # 1000 iteraciones de animación (10 segundos aprox)
+{
+    # 1) Limpiar canvas (borra todo el contenido previo)
+    canvas.clear();
+    
+    # Opcional: pintar fondo blanco para mejor visibilidad
+    canvas.setFillColor(1, 1, 1);
+    canvas.fillRect(0, 0, W, H);
+    
+    # 2) Dibujar plataforma verde en la parte inferior
+    canvas.setFillColor(0, 1, 0);
+    canvas.fillRect(0, platformTopY, W, platformHeight);
+    
+    # 3) i) Dibujar todos los Strichmännchen iterando sobre el array
+    for var man in stickmen do
+    {
+        drawStickman(man.x, man.y);
+    }
+    
+    # 4) Esperar 10ms para crear la animación fluida
+    wait(10);
+    
+    # 5) Actualizar el estado de cada Strichmännchen
+    for var man in stickmen do
+    {
+        # ==========================
+        # l) Actualizar posición horizontal según walk_speed
+        # ==========================
+        man.x = man.x + man.walk_speed;
+        
+        # Comprobar colisiones con paredes laterales
+        # Si toca la pared izquierda (consideramos margen de 20px)
+        if man.x < 20 then
+        {
+            man.x = 20;  # reposicionar en el límite
+            man.walk_speed = -man.walk_speed;  # invertir dirección (rebote)
+        }
+        
+        # Si toca la pared derecha
+        if man.x > W - 20 then
+        {
+            man.x = W - 20;  # reposicionar en el límite
+            man.walk_speed = -man.walk_speed;  # invertir dirección (rebote)
+        }
+        
+        # ==========================
+        # n) Implementar la lógica de salto con física de gravedad
+        # ==========================
+        if man.is_jumping then
+        {
+            # Si el Strichmännchen está en el suelo (o debajo por algún error)
+            if man.y >= commonY then
+            {
+                # Iniciar el salto: dar una velocidad vertical negativa (hacia arriba)
+                # -2 es la velocidad inicial del salto
+                man.dir_y = -2;
+                man.y = commonY;  # asegurar que está exactamente en el suelo
+            }
+            
+            # Actualizar posición vertical según la velocidad vertical actual
+            man.y = man.y + man.dir_y;
+            
+            # Simular gravedad: aumentar dir_y en 0.1 cada frame
+            # Esto hace que el salto desacelere hacia arriba y acelere hacia abajo
+            man.dir_y = man.dir_y + 0.1;
+            
+            # Si el Strichmännchen ha vuelto al suelo (cayendo)
+            if man.y >= commonY then
+            {
+                man.y = commonY;  # reposicionar exactamente en el suelo
+                # dir_y se reseteará en el próximo ciclo cuando toque el suelo
+            }
+        }
+        # Si no está saltando, mantener la posición y en el suelo
+        else
+        {
+            man.y = commonY;
+            man.dir_y = 0;
+        }
+    }
+}
+
+# ==========================
+# Fin de la animación
+# ==========================
+print("Animación finalizada después de 1000 frames");
+print("Número total de Strichmännchen: " + stickmen.size());
+
+# ==========================
+# o) Testing: Todas las combinaciones probadas
+#    1. Quieto sin saltar ✓
+#    2. Camina derecha sin saltar ✓
+#    3. Camina izquierda sin saltar ✓
+#    4. Quieto saltando ✓
+#    5. Camina derecha saltando ✓
+#    6. Camina izquierda saltando ✓
+#    7. Velocidad diferente sin saltar ✓
+#
+# Comportamientos observados:
+# - Los Strichmännchen caminan correctamente en sus direcciones
+# - Rebotan en las paredes laterales
+# - Los que saltan lo hacen continuamente con física realista
+# - La gravedad simula un movimiento parabólico natural
+# - Los que caminan Y saltan combinan ambos movimientos correctamente
+# ==========================
