@@ -1,0 +1,105 @@
+var initialCandles = 11;
+var stubsPerNewCandle = 4;
+var initialLeftoverStubs = 3;
+
+# a) Function kerze_iterativ 
+function kerze_iterativ(numberOfCandles, stubsNeeded, leftoverStubs)
+{
+    # b) Initialize counter for total burned candles
+    var totalBurnedCandles = 0;
+    
+    var currentCandles = numberOfCandles;
+    var currentLeftoverStubs = leftoverStubs;
+
+    # e) Loop condition: Continue as long as there are whole candles to burn.
+    while (currentCandles > 0) do
+    {
+        # --- Step 1: Burning ---
+        var candlesBurnedThisCycle = currentCandles;
+        totalBurnedCandles = totalBurnedCandles + candlesBurnedThisCycle;
+        
+        # d) First Print Output (Burning)
+        print("Es brennen " + candlesBurnedThisCycle + " ganze Kerzen ab.");
+        
+        # f) Calculate available stubs
+        var newStubsGenerated = candlesBurnedThisCycle;
+        var availableStubs = currentLeftoverStubs + newStubsGenerated;
+        
+        # d) Second Print Output (Available Stubs)
+        print("Nun sind " + availableStubs + " Stummel verfuegbar, um neue Kerzen zu produzieren.");
+        
+        # --- Step 2: Production ---
+        
+        # d) Calculate new candles (Integer Division using math.floor())
+        var newCandlesProduced = math.floor(availableStubs / stubsNeeded);
+        
+        # d) Calculate remaining stubs (Modulo operation)
+        var stubsRemainingNew = availableStubs % stubsNeeded;
+        
+        # d) Third and Fourth Print Output (Production and Leftovers)
+        print("Daraus werden " + newCandlesProduced + " neue Kerzen produziert.");
+        print("Dabei bleiben " + stubsRemainingNew + " Stummel uebrig.");
+        
+        # f) Update state for the next cycle
+        currentCandles = newCandlesProduced;
+        currentLeftoverStubs = stubsRemainingNew;
+    }
+
+    # c) Return the total count
+    return totalBurnedCandles;
+}
+
+function kerze_rekursiv(numberOfCandles, stubsNeeded, leftoverStubs)
+{
+    # d) Base Case (Rekursionsverankerung)
+    # Stop the recursion if no whole candles are available to burn.
+    if (numberOfCandles == 0)
+    {
+        return 0;
+    }
+
+    # b) Calculation of candles and stubs for a single pass
+    
+    # 1. Burn current candles and collect new stubs
+    var candlesBurnedThisStep = numberOfCandles;
+    var newStubsGenerated = candlesBurnedThisStep;
+    
+    # Total stubs available for production
+    var availableStubs = leftoverStubs + newStubsGenerated;
+    
+    # Output Part 1
+    print("Es brennen " + candlesBurnedThisStep + " ganze Kerzen ab.");
+    print("Nun sind " + availableStubs + " Stummel verfuegbar, um neue Kerzen zu produzieren.");
+    
+    # 2. Produce new candles (Integer Division using math.floor())
+    var newCandlesProduced = math.floor(availableStubs / stubsNeeded);
+    
+    # 3. Calculate remaining stubs (Modulo)
+    var stubsRemainingNew = availableStubs % stubsNeeded;
+    
+    # Output Part 2
+    print("Daraus werden " + newCandlesProduced + " neue Kerzen produziert.");
+    print("Dabei bleiben " + stubsRemainingNew + " Stummel uebrig.");
+    
+    # c) Return Statement: Sum of currently burned candles and the result of the next recursive call
+    return candlesBurnedThisStep + kerze_rekursiv(
+        newCandlesProduced, # The new candles become the input for the next step
+        stubsNeeded,
+        stubsRemainingNew   # The remaining stubs are carried over
+    );
+}
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+var result = kerze_iterativ( # kerze_rekursiv
+    initialCandles, 
+    stubsPerNewCandle, 
+    initialLeftoverStubs
+);
+
+# Final required output
+print("Insgesamt brennen " + result + " Kerzen ab.");
+
