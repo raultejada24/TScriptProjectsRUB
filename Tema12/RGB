@@ -1,0 +1,149 @@
+# RGB-Mau-Mau
+
+# definition of a card, consisting of a color and a value
+class Card
+{
+public:
+	var value;       # 0 to 9
+	var r, g, b;     # RGB color of the card
+	constructor(value_, r_, g_, b_)
+	{
+		value = value_;
+		r = r_;
+		g = g_;
+		b = b_;
+	}
+}
+
+function createCard()
+{
+	return Card(Integer(10 * math.random()), math.random(), math.random(), math.random());
+}
+
+# Decide whether the given card can be played, given the top of the pile.
+# The function shall return true if the card can be played, and false otherwise.
+function canPlayCard(card, top)
+{
+	if card.value == top.value then return true;
+	var squaredDist = (card.r - top.r)^2 + (card.g - top.g)^2 + (card.b - top.b)^2;
+	return squaredDist <= 0.5^2;
+}
+
+
+# Return true of the player with the given hand (array of cards) must draw a card,
+# otherwise return false. A player must draw if he/she cannot play any card.
+function mustDrawCard(hand, top)
+{
+	for var card in hand do if canPlayCard(card, top) then return false;
+	return true;
+}
+
+# draw a single card on the canvas
+function drawCard(card, x, y, w, h, playable)
+{
+	use namespace canvas;
+	var brightness = (card.r + card.g + card.b) / 3;
+	var fontcolor = 1;
+	if brightness >= 0.5 then fontcolor = 0;
+	setLineColor(fontcolor, fontcolor, fontcolor);
+	setFillColor(card.r, card.g, card.b);
+	if playable
+	then setLineWidth(h/15);
+	else setLineWidth(1);
+	frameRect(x-w/2, y-h/2, w, h);
+	setTextAlign("center");
+	setFont("Helvetica", h/2);
+	setFillColor(fontcolor, fontcolor, fontcolor);
+	text(x, y, card.value);
+}
+
+# redraw all cards
+function draw(hands, top, activePlayer)
+{
+	canvas.setFillColor(0.5, 0.5, 0.5);
+	canvas.clear();
+	var w = canvas.width();
+	var h = canvas.height();
+	var s = math.min(h/5, w/10);
+	drawCard(top, w/2, h/2, s/2, s, false);
+	for var player in 0:2 do
+	{
+		var n = hands[player].size();
+		for var i in 0:n do
+		{
+			var p = false;
+			if player == activePlayer then p = canPlayCard(hands[player][i], top);
+			drawCard(hands[player][i], w * (i+1) / (n+1), h*(4*player+1)/6, s/2, s, p);
+		}
+	}
+}
+
+# initialize the game
+var top = createCard();       # top of the pile
+var hands = [[], []];         # hands of both players
+var turn = 0;                 # player whose turn it is
+var active = -1;              # player with active click interface
+var delay = 0;                # waiting time (number of timer ticks)
+for var player in 0:2 do
+{
+	for 0:6 do hands[player].push(createCard());
+}
+draw(hands, top, active);
+
+# handle events
+setEventHandler("canvas.resize", function(event) { draw(hands, top, active); });
+
+setEventHandler("canvas.mousedown", function(event)
+{
+	# a player is trying to play a card
+	if active < 0 then return;
+	var w = canvas.width();
+	var hand = hands[active];
+	var index = event.x * (hand.size() * 1) // w;
+	if index >= 0 and index < hand.size() then
+	{
+		if canPlayCard(hand[index], top) then
+		{
+			top = hand[index];
+			hand.remove(index);
+			draw(hands, top, active);
+			if hand.size() == 0 then quitEventMode(turn + 1);
+			turn = 1 - turn;
+			active = -1;
+		}
+	}
+});
+
+setEventHandler("timer", function(event)
+{
+	if delay > 0 then
+	{
+		delay -= 1;
+		if delay == 0 then
+		{
+			# draw a card
+			hands[turn].push(createCard());
+			turn = 1 - turn;
+			draw(hands, top, active);
+		}
+		return;
+	}
+
+	if active == -1 then
+	{
+		if mustDrawCard(hands[turn], top) then
+		{
+			# trigger drawing a card with a delay
+			delay = 50;
+		}
+		else
+		{
+			# enable the click interface
+			active = turn;
+			draw(hands, top, active);
+		}
+	}
+});
+
+var winner = enterEventMode();
+alert("Spieler " + winner + " gewinnt!");

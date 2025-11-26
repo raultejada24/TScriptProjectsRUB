@@ -1,0 +1,504 @@
+# ======================================
+# SNAKE GAME - TScript Edition MEJORADO
+# ======================================
+# Juego de Snake con gestión avanzada de eventos,
+# menú de inicio, pausas y mejor interfaz
+# ======================================
+
+print("=== SNAKE GAME INICIADO ===");
+print("Controles: Flechas del teclado | ESPACIO para pausar");
+print("Haz clic en START para comenzar");
+print("");
+
+# Configuración del canvas
+var W = canvas.width();
+var H = canvas.height();
+
+# Configuración del juego
+var gridSize = 20;
+var cols = math.floor(W / gridSize);
+var rows = math.floor(H / gridSize);
+
+# Estados del juego: "menu", "playing", "paused", "gameover"
+var gameState = "menu";
+var score = 0;
+var highScore = 0;
+var speed = 50;
+
+# Serpiente
+var snake = [];
+var dx = 0;
+var dy = 0;
+var nextDx = 0;
+var nextDy = 0;
+
+# Manzana
+var appleX = 0;
+var appleY = 0;
+
+# ======================================
+# Función: Inicializar juego
+# ======================================
+function initGame()
+{
+	snake = [];
+	var startX = math.floor(cols / 2);
+	var startY = math.floor(rows / 2);
+	snake.push([startX, startY]);
+	snake.push([startX - 1, startY]);
+	snake.push([startX - 2, startY]);
+	
+	dx = 1;
+	dy = 0;
+	nextDx = 1;
+	nextDy = 0;
+	score = 0;
+	speed = 200; # Cuanto mas alto menos velocidad
+	gameState = "playing";
+	
+	spawnApple();
+	print("🎮 Nuevo juego iniciado");
+	print("Serpiente en posición (" + startX + ", " + startY + ")");
+}
+
+# ======================================
+# Función: Generar nueva manzana
+# ======================================
+function spawnApple()
+{
+	var validPosition = false;
+	
+	while not validPosition do
+	{
+		appleX = math.floor(math.random() * cols);
+		appleY = math.floor(math.random() * rows);
+		
+		validPosition = true;
+		for var segment in snake do
+		{
+			if segment[0] == appleX and segment[1] == appleY then
+			{
+				validPosition = false;
+				break;
+			}
+		}
+	}
+	
+	print("🍎 Nueva manzana en (" + appleX + ", " + appleY + ")");
+}
+
+# ======================================
+# Función: Dibujar cuadrícula
+# ======================================
+function drawGrid()
+{
+	canvas.setLineColor(0.85, 0.85, 0.85);
+	canvas.setLineWidth(1);
+	
+	for var i in 0:cols do
+	{
+		var x = i * gridSize;
+		canvas.line(x, 0, x, H);
+	}
+	
+	for var i in 0:rows do
+	{
+		var y = i * gridSize;
+		canvas.line(0, y, W, y);
+	}
+}
+
+# ======================================
+# Función: Dibujar serpiente
+# ======================================
+function drawSnake()
+{
+	for var i in 0:snake.size() do
+	{
+		var segment = snake[i];
+		var x = segment[0] * gridSize;
+		var y = segment[1] * gridSize;
+		
+		if i == 0 then
+		{
+			# Cabeza con efecto 3D
+			canvas.setFillColor(0, 0.7, 0);
+			canvas.fillRect(x + 2, y + 2, gridSize - 4, gridSize - 4);
+			
+			# Ojos de la serpiente
+			canvas.setFillColor(1, 1, 0);
+			if dx == 1 then    # Mirando derecha
+			{
+				canvas.fillCircle(x + gridSize - 6, y + 5, 2);
+				canvas.fillCircle(x + gridSize - 6, y + gridSize - 5, 2);
+			}
+			else if dx == -1 then    # Mirando izquierda
+			{
+				canvas.fillCircle(x + 6, y + 5, 2);
+				canvas.fillCircle(x + 6, y + gridSize - 5, 2);
+			}
+			else if dy == -1 then    # Mirando arriba
+			{
+				canvas.fillCircle(x + 5, y + 6, 2);
+				canvas.fillCircle(x + gridSize - 5, y + 6, 2);
+			}
+			else if dy == 1 then    # Mirando abajo
+			{
+				canvas.fillCircle(x + 5, y + gridSize - 6, 2);
+				canvas.fillCircle(x + gridSize - 5, y + gridSize - 6, 2);
+			}
+		}
+		else
+		{
+			# Cuerpo con degradado
+			var brightness = 0.3 + 0.5 * (1 - i / snake.size());
+			canvas.setFillColor(brightness * 0.3, brightness, brightness * 0.3);
+			canvas.fillRect(x + 2, y + 2, gridSize - 4, gridSize - 4);
+		}
+		
+		canvas.setLineColor(0, 0.4, 0);
+		canvas.setLineWidth(2);
+		canvas.rect(x + 2, y + 2, gridSize - 4, gridSize - 4);
+	}
+}
+
+# ======================================
+# Función: Dibujar manzana
+# ======================================
+function drawApple()
+{
+	var x = appleX * gridSize;
+	var y = appleY * gridSize;
+	
+	# Manzana roja con degradado
+	canvas.setFillColor(0.8, 0, 0);
+	canvas.fillCircle(x + gridSize/2, y + gridSize/2, gridSize/2 - 2);
+	
+	canvas.setFillColor(1, 0.2, 0.2);
+	canvas.fillCircle(x + gridSize/2, y + gridSize/2, gridSize/2 - 4);
+	
+	# Brillo
+	canvas.setFillColor(1, 0.6, 0.6);
+	canvas.fillCircle(x + gridSize/2 - 3, y + gridSize/2 - 3, 3);
+	
+	# Tallo
+	canvas.setLineColor(0.4, 0.2, 0);
+	canvas.setLineWidth(2);
+	canvas.line(x + gridSize/2, y + 3, x + gridSize/2, y + 7);
+}
+
+# ======================================
+# Función: Dibujar HUD (puntuación)
+# ======================================
+function drawHUD()
+{
+	var padding = 10;
+	var barHeight = 30;
+	
+	# Barra superior semitransparente
+	canvas.setFillColor(0, 0, 0);
+	canvas.setOpacity(0.7);
+	canvas.fillRect(0, 0, W, barHeight);
+	canvas.setOpacity(1);
+	
+	# Puntuación actual
+	canvas.setFillColor(1, 1, 1);
+	canvas.setFont("Helvetica", 20);
+	canvas.setTextAlign("left");
+	canvas.text(padding, 5, "Score: " + score);
+	
+	# High Score
+	canvas.setTextAlign("right");
+	canvas.text(W - padding, 5, "High: " + highScore);
+	
+	# Longitud
+	canvas.setTextAlign("center");
+	canvas.text(W/2, 5, "Longitud: " + snake.size());
+}
+
+# ======================================
+# Función: Dibujar menú de inicio
+# ======================================
+function drawMenu()
+{
+	# Fondo con degradado
+	for var y in 0:H do
+	{
+		var gradient = y / H;
+		canvas.setFillColor(0.1 + gradient * 0.2, 0.3 + gradient * 0.4, 0.1 + gradient * 0.2);
+		canvas.fillRect(0, y, W, 1);
+	}
+	
+	# Título
+	canvas.setFillColor(1, 1, 0);
+	canvas.setFont("Helvetica", 60);
+	canvas.setTextAlign("center");
+	canvas.text(W/2, H/2 - 60, "SNAKE GAME");
+	
+	# Subtítulo
+	canvas.setFillColor(1, 1, 1);
+	canvas.setFont("Helvetica", 24);
+	canvas.text(W/2, H/2, "Haz clic para comenzar");
+	
+	# Controles
+	canvas.setFont("Helvetica", 18);
+	canvas.text(W/2, H/2 + 40, "Controles: ⬆️ ⬇️ ⬅️ ➡️");
+	canvas.text(W/2, H/2 + 65, "ESPACIO para pausar");
+	
+	# High Score
+	if highScore > 0 then
+	{
+		canvas.setFillColor(1, 0.8, 0);
+		canvas.setFont("Helvetica", 20);
+		canvas.text(W/2, H/2 + 100, "High Score: " + highScore);
+	}
+}
+
+# ======================================
+# Función: Dibujar pausa
+# ======================================
+function drawPaused()
+{
+	# Overlay semitransparente
+	canvas.setFillColor(0, 0, 0);
+	canvas.setOpacity(0.5);
+	canvas.fillRect(0, 0, W, H);
+	canvas.setOpacity(1);
+	
+	# Texto de pausa
+	canvas.setFillColor(1, 1, 1);
+	canvas.setFont("Helvetica", 48);
+	canvas.setTextAlign("center");
+	canvas.text(W/2, H/2 - 20, "PAUSA");
+	
+	canvas.setFont("Helvetica", 20);
+	canvas.text(W/2, H/2 + 20, "Presiona ESPACIO para continuar");
+}
+
+# ======================================
+# Función: Dibujar game over
+# ======================================
+function drawGameOver()
+{
+	# Overlay
+	canvas.setFillColor(0, 0, 0);
+	canvas.setOpacity(0.8);
+	canvas.fillRect(0, 0, W, H);
+	canvas.setOpacity(1);
+	
+	# Game Over
+	canvas.setFillColor(1, 0, 0);
+	canvas.setFont("Helvetica", 56);
+	canvas.setTextAlign("center");
+	canvas.text(W/2, H/2 - 60, "GAME OVER");
+	
+	# Estadísticas
+	canvas.setFillColor(1, 1, 1);
+	canvas.setFont("Helvetica", 28);
+	canvas.text(W/2, H/2, "Puntuación: " + score);
+	canvas.text(W/2, H/2 + 35, "Longitud: " + snake.size());
+	
+	# Nuevo récord
+	if score == highScore and score > 0 then
+	{
+		canvas.setFillColor(1, 1, 0);
+		canvas.setFont("Helvetica", 24);
+		canvas.text(W/2, H/2 + 70, "🎉 ¡NUEVO RÉCORD! 🎉");
+	}
+	
+	# Instrucciones
+	canvas.setFillColor(0.8, 0.8, 0.8);
+	canvas.setFont("Helvetica", 20);
+	canvas.text(W/2, H/2 + 110, "Haz clic para jugar de nuevo");
+}
+
+# ======================================
+# Función: Actualizar serpiente
+# ======================================
+function updateSnake()
+{
+	if gameState != "playing" then return;
+	
+	dx = nextDx;
+	dy = nextDy;
+	
+	var head = snake[0];
+	var newX = head[0] + dx;
+	var newY = head[1] + dy;
+	
+	# Colisión con paredes
+	if newX < 0 or newX >= cols or newY < 0 or newY >= rows then
+	{
+		gameState = "gameover";
+		if score > highScore then highScore = score;
+		print("");
+		print("💀 GAME OVER: ¡Chocaste con la pared!");
+		print("Puntuación: " + score + " | Longitud: " + snake.size());
+		return;
+	}
+	
+	# Colisión consigo misma
+	for var segment in snake do
+	{
+		if segment[0] == newX and segment[1] == newY then
+		{
+			gameState = "gameover";
+			if score > highScore then highScore = score;
+			print("");
+			print("💀 GAME OVER: ¡Te mordiste a ti mismo!");
+			print("Puntuación: " + score + " | Longitud: " + snake.size());
+			return;
+		}
+	}
+	
+	snake.insert(0, [newX, newY]);
+	
+	# Comer manzana
+	if newX == appleX and newY == appleY then
+	{
+		score = score + 10;
+		print("🎉 ¡Ñam! Score: " + score + " | Longitud: " + snake.size());
+		spawnApple();
+		
+		if speed > 50 then speed = speed - 2;
+	}
+	else
+	{
+		snake.pop();
+	}
+}
+
+# ======================================
+# Función: Renderizar
+# ======================================
+function render()
+{
+	# Fondo
+	canvas.setFillColor(0.95, 0.95, 0.95);
+	canvas.fillRect(0, 0, W, H);
+	
+	if gameState == "menu" then
+	{
+		drawMenu();
+	}
+	else if gameState == "playing" or gameState == "paused" then
+	{
+		drawGrid();
+		drawApple();
+		drawSnake();
+		drawHUD();
+		
+		if gameState == "paused" then
+		{
+			drawPaused();
+		}
+	}
+	else if gameState == "gameover" then
+	{
+		drawGrid();
+		drawApple();
+		drawSnake();
+		drawHUD();
+		drawGameOver();
+	}
+}
+
+# ======================================
+# Event Handlers
+# ======================================
+function onKeyDown(event)
+{
+	# Pausa con ESPACIO
+	if event.key == " " or event.key == "Spacebar" then
+	{
+		if gameState == "playing" then
+		{
+			gameState = "paused";
+			print("⏸️  Juego pausado");
+		}
+		else if gameState == "paused" then
+		{
+			gameState = "playing";
+			print("▶️  Juego reanudado");
+		}
+		return;
+	}
+	
+	if gameState != "playing" then return;
+	
+	# Controles de dirección
+	if event.key == "ArrowUp" and dy == 0 then
+	{
+		nextDx = 0;
+		nextDy = -1;
+		print("⬆️  Arriba");
+	}
+	else if event.key == "ArrowDown" and dy == 0 then
+	{
+		nextDx = 0;
+		nextDy = 1;
+		print("⬇️  Abajo");
+	}
+	else if event.key == "ArrowLeft" and dx == 0 then
+	{
+		nextDx = -1;
+		nextDy = 0;
+		print("⬅️  Izquierda");
+	}
+	else if event.key == "ArrowRight" and dx == 0 then
+	{
+		nextDx = 1;
+		nextDy = 0;
+		print("➡️  Derecha");
+	}
+}
+
+function onMouseDown(event)
+{
+	if gameState == "menu" then
+	{
+		initGame();
+	}
+	else if gameState == "gameover" then
+	{
+		gameState = "menu";
+		print("");
+		print("🔄 Volviendo al menú...");
+	}
+}
+
+function onResize(event)
+{
+	W = event.width;
+	H = event.height;
+	cols = math.floor(W / gridSize);
+	rows = math.floor(H / gridSize);
+	render();
+}
+
+# ======================================
+# Configurar eventos
+# ======================================
+setEventHandler("canvas.keydown", onKeyDown);
+setEventHandler("canvas.mousedown", onMouseDown);
+setEventHandler("canvas.resize", onResize);
+
+# ======================================
+# Bucle principal
+# ======================================
+render();
+
+var lastUpdate = 0;
+setEventHandler("timer", function(event)
+{
+	lastUpdate = lastUpdate + 20;
+	
+	if gameState == "playing" and lastUpdate >= speed then
+	{
+		lastUpdate = 0;
+		updateSnake();
+		render();
+	}
+});
+
+enterEventMode();

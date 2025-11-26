@@ -1,0 +1,79 @@
+var field = [["", "", ""], ["", "", ""], ["", "", ""]];
+var player = "x";
+
+function draw()
+{
+	var s = (math.min(canvas.width(), canvas.height()) - 40) // 3;
+	canvas.line(1*s+20, 20, 1*s+20, 3*s+20);
+	canvas.line(2*s+20, 20, 2*s+20, 3*s+20);
+	canvas.line(20, 1*s+20, 3*s+20, 1*s+20);
+	canvas.line(20, 2*s+20, 3*s+20, 2*s+20);
+	canvas.setFont("Helvetica", s/2);
+	canvas.setTextAlign("center");
+	for var y in 0:3 do
+	{
+		for var x in 0:3 do
+		{
+			canvas.text(20+s*(x+0.5), 20+s*(y+0.25), field[y][x]);
+		}
+	}
+}
+
+function move(x, y)
+{
+	assert(field[y][x] == "");
+	field[y][x] = player;
+	if player == "x" then player = "o"; else player = "x";
+}
+
+function winner()
+{
+	for var y in 0:3 do
+	{
+		if field[y][0] == field[y][1] and field[y][0] == field[y][2] then return field[y][0];
+	}
+	for var x in 0:3 do
+	{
+		if field[0][x] == field[1][x] and field[0][x] == field[2][x] then return field[0][x];
+	}
+	if field[0][0] == field[1][1] and field[0][0] == field[2][2] then return field[0][0];
+	if field[0][2] == field[1][1] and field[0][2] == field[2][0] then return field[0][2];
+	var empty = 0;
+	for var y in 0:3 do
+		for var x in 0:3 do
+			if field[y][x] == "" then empty += 1;
+	if empty == 0 then return "draw";
+	return "";
+}
+
+function userInput()
+{
+	setEventHandler("canvas.mousedown", function(event)
+	{
+		var s = (math.min(canvas.width(), canvas.height()) - 40) // 3;
+		var x = (event.x - 20) // s;
+		var y = (event.y - 20) // s;
+		if x >= 0 and x < 3 and y >= 0 and y < 3 then
+		{
+			if field[y][x] == "" then quitEventMode([x, y]);
+		}
+	});
+	return enterEventMode();
+}
+
+draw();
+while true do
+{
+	var pos = userInput();
+	var x = pos[0];
+	var y = pos[1];
+	move(x, y);
+	draw();
+	var w = winner();
+	if w != "" then
+	{
+		if w == "draw" then alert("Unentschieden");
+		else alert("Spieler " + w + " gewinnnt!");
+		break;
+	}
+}
