@@ -1,0 +1,97 @@
+function plan(field)
+{
+    var findBestMove = function(self, currentField, step)
+    {
+        var n = currentField.size();
+        var bestPath = [];
+
+        # Try to move every own piece
+        for var i in 0:n do
+        {
+            if currentField[i] == "o" then
+            {
+                var target = (i + step) % n;
+
+                # Check for capture
+                if currentField[target] == "x" then
+                {
+                    # Manual copy of the board
+                    var nextField = [];
+                    for var item in currentField do
+                    {
+                        nextField.push(item);
+                    }
+
+                    # Execute move
+                    nextField[i] = null;
+                    nextField[target] = "o";
+
+                    # Recurse (increase step size)
+                    var subPath = self(self, nextField, step + 1);
+
+                    # Build the path
+                    var currentPath = [i];
+                    for var nextMove in subPath do
+                    {
+                        currentPath.push(nextMove);
+                    }
+
+                    # Keep the longest sequence
+                    if currentPath.size() > bestPath.size() then
+                    {
+                        bestPath = currentPath;
+                    }
+                }
+            }
+        }
+        return bestPath;
+    };
+
+    # Start recursion with step 1
+    return findBestMove(findBestMove, field, 1);
+}
+
+
+# ======================================
+# TEST BLOCK
+# ======================================
+
+# 1. Define the Scenario from the description
+# "x" at 0, 2, 5
+# "o" at 1, 6, 8
+# Size 10
+var testField = ["x", "o", "x", null, null, "x", "o", null, "o", null];
+
+print("------------------------------------------------");
+print("Test Case: Mensch-Ärgere-Dich-Nicht Variant");
+print("------------------------------------------------");
+print("Initial Field: " + testField);
+
+# 2. Execute plan
+var result = plan(testField);
+
+# 3. Output results
+print("Calculated Move Sequence: " + result);
+print("Total Captures: " + result.size());
+
+# 4. Verify against expected solution [1, 8, 2]
+var expected = [1, 8, 2];
+var success = true;
+
+if result.size() != expected.size() then success = false;
+else 
+{
+    for var i in 0:result.size() do
+    {
+        if result[i] != expected[i] then success = false;
+    }
+}
+
+if success then
+{
+    print("✅ SUCCESS: The calculated move matches the example [1, 8, 2].");
+}
+else
+{
+    print("❌ FAILED: Expected [1, 8, 2] but got " + result);
+}
