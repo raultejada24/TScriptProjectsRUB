@@ -1,0 +1,7 @@
+El punto (0,0) está en la esquina superior izquierda de la ventana (del lienzo o canvas).
+
+Así funcionan los ejes en TScript:
+
+    Eje X: Crece hacia la derecha (como en matemáticas normales).
+
+    Eje Y: Crece hacia abajo (al revés de las matemáticas normales).

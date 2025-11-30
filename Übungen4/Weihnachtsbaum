@@ -1,1 +1,200 @@
-print("Hey");
+# ==========================================================
+# PREPARATION: Helper Function and Trunk 
+# ==========================================================
+
+# Function to draw a single triangle
+function drawTriangle(x, y, height, width) {
+    var topPoint = [x, y - height];
+    var bottomRight = [x + width / 2, y];
+    var bottomLeft = [x - width / 2, y];
+    var points = [topPoint, bottomRight, bottomLeft];
+    canvas.fillArea(points);
+}
+
+# Setup Canvas
+canvas.clear();
+var w = canvas.width();
+var h = canvas.height();
+var centerX = w / 2;
+
+# Draw Trunk
+canvas.setFillColor(0.4, 0.2, 0); 
+var trunkWidth = 100;
+var trunkHeight = 70;
+canvas.fillRect(centerX - trunkWidth/2, h - 50 - trunkHeight, trunkWidth, trunkHeight);
+
+# ==========================================================
+# PART C: Recursive Solution
+# ==========================================================
+
+# We define global variables to track the state across recursive calls
+# (Position and size of the current tree layer)
+var currentY = h - 50 - trunkHeight; 
+var currentWidth = 300;              
+var triangleHeight = 100;
+
+canvas.setFillColor(0, 0.5, 0); # Green for leaves
+
+# Recursive function definition
+function drawTree(i) {
+    # 1. Base Case: If i is 0, stop recursion
+    if (i <= 0) then return;
+
+    # 2. Draw the triangle
+    drawTriangle(centerX, currentY, triangleHeight, currentWidth);
+    
+    # 3. Update state for the next layer (move up and shrink)
+    currentY = currentY - (triangleHeight * 0.7); 
+    currentWidth = currentWidth * 0.7; 
+    
+    # 4. Wait to make the drawing process visible (animation)
+    wait(0.5); # waits 0.5 seconds
+
+    # 5. Recursive Step: Call the function again with i-1
+    drawTree(i - 1);
+}
+
+# Execute the recursive function to draw 5 layers
+# Uncomment the line below to run Part C
+drawTree(5);
+
+
+# ==========================================================
+# PART D: Draw in Reverse
+# ==========================================================
+#* To draw the tree in reverse order (execution wise), 
+   we swap the drawing command and the recursive call.
+   
+   Note: In graphics, this changes the "Painter's Algorithm" order.
+   If we draw the top first, the bottom layers will overlap it.
+*#
+
+#*
+function drawTreeReverse(i) {
+    if (i <= 0) return;
+
+    # We calculate the NEXT state before recursing 
+    var myY = currentY; 
+    var myH = triangleHeight;
+    var myW = currentWidth;
+    
+    # Update globals for the next guy
+    currentY = currentY - (triangleHeight * 0.7); 
+    currentWidth = currentWidth * 0.7; 
+
+    # RECURSIVE CALL FIRST
+    drawTreeReverse(i - 1);
+    
+    # DRAW AFTER
+    wait(0.5);
+    drawTriangle(centerX, myY, myH, myW);
+}
+*#
+
+# ==========================================================
+# PART F: Event Handler to Quit ('q')
+# ==========================================================
+
+# Anonymous function to handle key presses
+setEventHandler("canvas.keydown", function(event) {
+    # Check if the key pressed is "q"
+    if (event.key == "q") then {
+        print("Exiting Event Mode...");
+        quitEventMode(); # Standard TScript command to stop events
+    }
+});
+
+# ==========================================================
+# PART G: Event Handler for Mouse Click (Ornaments)
+# ==========================================================
+
+# Anonymous function for mouse down
+setEventHandler("canvas.mousedown", function(event) {
+    # 1. Random Radius between 4 and 10
+    # math.random() gives 0 to 1. 
+    # 6 * random gives 0 to 6. 
+    # + 4 gives 4 to 10.
+    var radius = 4 + math.random() * 6;
+
+    # 2. Random Color
+    var r = math.random();
+    var g = math.random();
+    var b = math.random();
+    canvas.setFillColor(r, g, b);
+
+    # 3. Draw Circle at mouse position
+    canvas.fillCircle(event.x, event.y, radius);
+});
+
+# ==========================================================
+# PART H: Creativity (Snowfall) & Data Structures
+# ==========================================================
+
+#*
+   THEORY ANSWERS:
+   
+   1. Which data structure is best for ONE ball/snowflake?
+      -> A Class (or an Object). 
+      It allows us to bundle properties like x, y, speed, and radius together.
+   
+   2. Which data structure is best for ALL balls?
+      -> An Array (List).
+      It allows us to iterate through all of them to update their positions.
+*#
+
+# Implementation of Snowfall using a Class
+
+class Snowflake {
+    public:
+    var x;
+    var y;
+    var speed;
+    var size;
+
+    constructor(w, h) {
+        # Start at random X, and random Y (often above screen)
+        x = math.random() * w;
+        y = math.random() * h; 
+        speed = 1 + math.random() * 2; # Speed between 1 and 3
+        size = 2 + math.random() * 3;
+    }
+
+    function move(h) {
+        y = y + speed;
+        # If it goes off the bottom, reset to top
+        if (y > h) then {
+            y = 0;
+            x = math.random() * canvas.width();
+        }
+    }
+
+    function draw() {
+        canvas.fillCircle(x, y, size);
+    }
+}
+
+# Create an array to hold the snowflakes
+var snowflakes = [];
+# Create 50 snowflakes
+for var k in 0:50 do {
+	var c = Snowflake(w, h);
+    snowflakes.push(c);
+}
+
+# Timer event to animate the snow
+setEventHandler("timer", function(event) {
+    # We don't want to clear the WHOLE treeq, but for simple animation
+    # we usually clear screen. Since we can't redraw the tree every frame
+    # easily without complex code, we will just draw white snow on top.
+    
+    canvas.setFillColor(1, 1, 1); # White snow
+    
+    for var flake in snowflakes do {
+        flake.draw();
+        flake.move(h);
+    }
+});
+
+
+# Essential: Enter event mode to listen for keys, mouse, and timer
+enterEventMode();
