@@ -1,0 +1,86 @@
+# define global variables
+var paddle_y_pos = canvas.height() - 50;
+var paddle_x_pos = canvas.width() / 2;
+var paddle_width = 150;
+var ball_radius = 20;
+var n_balls = 5;
+
+# container to save the balls' attributes
+class Ball {
+public:
+	var x;
+	var y;
+	var vel_x;
+	var vel_y;
+
+	constructor() {
+		x = math.random() * canvas.width();
+		y = math.random() * canvas.height()/2;
+		vel_x = math.random() * 2;
+		vel_y = (math.random() - 0.5) * 3;
+	}
+}
+
+# create balls and save them into an array
+var ball_list = [];
+for var i in 0:n_balls do {
+	ball_list.push(Ball());	
+}
+
+# our main loop
+function onTimer(event){
+	# white background
+	canvas.setFillColor(1, 1, 1);
+	canvas.fillRect(0, 0, canvas.width(), canvas.height());
+
+	# draw paddle
+	var paddle_height = 20;
+	canvas.setFillColor(1,0,0);
+	canvas.fillRect(paddle_x_pos - paddle_width/2, paddle_y_pos, paddle_width, paddle_height);
+
+	for var i in 0:n_balls do {
+		var b = ball_list[i];
+		# collision with paddle
+		if b.y > paddle_y_pos - ball_radius and b.x > paddle_x_pos - paddle_width/2 and b.x < paddle_x_pos + paddle_width/2 then {
+			b.vel_y *= -1;
+		}
+
+		# collision with left wall
+		if b.x < 0 then {
+			b.vel_x *= -1;
+		}
+
+		#collision with right wall
+		if b.x > canvas.width() then {
+			b.vel_x *= -1;
+		}
+
+		# move ball according to its velocity
+		b.x += b.vel_x;
+		b.y += b.vel_y;
+
+		# add gravity
+		b.vel_y += 0.1;
+
+		# draw the ball!
+		canvas.setFillColor(0,1,0);
+		canvas.fillCircle(b.x, b.y, ball_radius);
+	}
+}
+
+# move paddle according to horizontal mouse position
+function onMouseMove(event) {
+	var paddle_x_pos = event.x;
+}
+
+# create new ball on mouse click
+function onClick(event) {
+	var b = Ball();
+	canvas.setFillColor(0,1,0);
+	canvas.fillCircle(b.x, b.y, ball_radius);
+	ball_list.push(b);
+}
+
+setEventHandler("timer", onTimer);
+setEventHandler("canvas.mousedown", onClick);
+enterEventMode();
