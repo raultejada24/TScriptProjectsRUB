@@ -1,0 +1,125 @@
+function pack(a, b, c, d)
+{
+    # 1. Validación de Tipos
+    if (math.floor(a) != a or math.floor(b) != b or math.floor(c) != c or math.floor(d) != d) then {
+        error("Todos los parametros deben ser enteros.");
+    }
+
+    # 2. Validación de Rangos
+    if (a < 1 or a > 16) then error("a fuera de rango (1-16).");
+    if (b < 1 or b > 200) then error("b fuera de rango (1-200).");
+    if (c < 1 or c > 20000) then error("c fuera de rango (1-20000).");
+    if (d < 1 or d > 12) then error("d fuera de rango (1-12).");
+
+    # 3. Empaquetado usando Multiplicación y Suma
+    var packed = 0;
+    
+    # a está en la posición 0. No se multiplica.
+    packed = packed + a; 
+    
+    # b va después de 5 bits. Multiplicamos por 2^5 (32)
+    packed = packed + (b * 32); 
+    
+    # c va después de 13 bits (5 de a + 8 de b). Multiplicamos por 2^13 (8192)
+    packed = packed + (c * 8192);
+    
+    # d va después de 28 bits (13 + 15 de c). Multiplicamos por 2^28 (268435456)
+    packed = packed + (d * 268435456);
+
+    return packed;
+}
+
+function unpack(n)
+{
+    if (math.floor(n) != n) then error("El parametro debe ser entero.");
+
+    # Desempaquetado con corrección de signo
+
+    # 1. Extraer a (resto de 32)
+    var a = n % 32;
+    # Si por algún motivo el módulo da negativo, lo corregimos
+    if (a < 0) then a = a + 32;
+
+    # 2. Extraer b
+    var b = math.floor(n / 32) % 256;
+    if (b < 0) then b = b + 256;
+
+    # 3. Extraer c
+    var c = math.floor(n / 8192) % 32768;
+    if (c < 0) then c = c + 32768;
+
+    # 4. Extraer d (AQUÍ ESTABA EL ERROR PRINCIPAL)
+    # Al dividir, si el número era negativo, el resultado es negativo
+    var d = math.floor(n / 268435456);
+    
+    # CORRECCIÓN: Si d es negativo debido al bit de signo, sumamos 16
+    if (d < 0) then {
+        d = d + 16;
+    }
+    
+    # Filtramos d con máscara de 4 bits (módulo 16) por seguridad
+    d = d % 16;
+
+    return [a, b, c, d];
+}
+
+
+# ==========================================
+# 🧪 BLOQUE DE PRUEBAS PARA PACK/UNPACK
+# ==========================================
+
+print("--- Iniciando Pruebas de Pack/Unpack ---");
+
+# Función auxiliar para verificar resultados
+function test_case(name, ta, tb, tc, td)
+{
+    print("Test: " + name);
+    
+    # 1. Empaquetar
+    var packed_val = pack(ta, tb, tc, td);
+    print("   > Valor empaquetado (int): " + packed_val);
+    
+    # 2. Desempaquetar
+    var result_array = unpack(packed_val);
+    var ra = result_array[0];
+    var rb = result_array[1];
+    var rc = result_array[2];
+    var rd = result_array[3];
+    
+    # 3. Comparar
+    if (ra == ta and rb == tb and rc == tc and rd == td) then {
+        print("   ✅ ÉXITO: " + result_array);
+    } else {
+        print("   ❌ FALLO: Se esperaba [" + ta + ", " + tb + ", " + tc + ", " + td + "]");
+        print("             Pero se recibió " + result_array);
+    }
+    print("--------------------------------------------");
+}
+
+# --- EJECUTAR PRUEBAS ---
+
+# 1. Prueba Estándar (Valores intermedios)
+test_case("Valores Normales", 5, 100, 5000, 6);
+
+# 2. Prueba de Límites Mínimos (Todos 1)
+test_case("Límites Mínimos", 1, 1, 1, 1);
+
+# 3. Prueba de Límites Máximos
+# a=16, b=200, c=20000, d=12
+test_case("Límites Máximos", 16, 200, 20000, 12);
+
+# 4. Prueba de Integridad (Comprobar que no se mezclan los bits)
+# Usamos valores que tienen patrones de bits alternados para ver si se solapan
+test_case("Patrón de Bits", 10, 170, 10922, 10);
+
+
+print("--- Pruebas de Errores (Descomentar para probar) ---");
+
+# Para probar si tus 'if' de error funcionan,
+# quita el símbolo '#' de una de las líneas de abajo CADA VEZ.
+# El programa debería detenerse y mostrar tu mensaje de error.
+
+# pack(17, 10, 10, 1);      # Error esperado: 'a' fuera de rango (>16)
+# pack(5, 201, 10, 1);      # Error esperado: 'b' fuera de rango (>200)
+# pack(1, 1, 1, 1.5);       # Error esperado: No es entero
+# unpack(3.5);              # Error esperado: unpack recibe float
