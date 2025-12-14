@@ -1,0 +1,92 @@
+function sum(array) {
+var s = 0;
+	for var i in (0:array.size()) do{
+		s += array[i];
+	}
+	# print(s);
+	return s;
+}
+
+var array = [1, 4, 6, 2, 5];
+
+var result = sum(array);
+print(result);
+
+
+
+function sum(array) {
+    var s = 0;
+    var i = 0;
+
+    # --- INICIO DE VERIFICACIÓN FORMAL ---
+
+    # CP1: Punto de Control (Aquí vive la Invariante)
+    while i < array.size() do {
+        s += array[i];
+        i += 1;
+    }
+    return s;
+}
+
+# ---------------- SOLUCIÓN DEL EJERCICIO ----------------
+
+# a) Funcionamiento:
+#    La función recorre el array índice por índice y acumula
+#    la suma de todos sus elementos en la variable 's'.
+
+# b) Puntos de Control:
+#    Se necesita 1 punto de control (CP1) colocado justo antes
+#    de evaluar la condición del 'while'.
+
+# c) Rutas (Paths):
+#    1. Inicio -> CP1 (Inicialización)
+#    2. CP1 -> CP1 (Cuerpo del bucle / Iteración)
+#    3. CP1 -> Fin (Terminación / Return)
+
+# d) Estado antes del primer paso (Inicio -> CP1):
+#    s = 0
+#    i = 0
+
+# e) Estado tras el 1er paso:
+#    s = array[0]
+#    i = 1
+
+# f) Estado tras el 2do paso:
+#    s = array[0] + array[1]
+#    i = 2
+
+# g) Estado tras 'k' pasos (donde i = k):
+#    s = Suma de los primeros k elementos (indices 0 a k-1)
+#    i = k
+
+# h) Estado al final del bucle:
+#    i = array.size()
+#    s = Suma de todos los elementos (indices 0 a size-1)
+
+# i) Invariante del Bucle (I):
+#    Es la propiedad que siempre es cierta en CP1:
+#    I = (0 <= i <= array.size()) AND (s == Sumatoria(j=0 hasta i-1) de array[j])
+#    Nota: Una sumatoria vacía (cuando i=0) es igual a 0.
+
+# j) Cambios en el recorrido (CP1 -> CP1):
+#    i_nuevo = i_viejo + 1
+#    s_nuevo = s_viejo + array[i_viejo]
+
+# k) Verificación Inicio -> CP1:
+#    Con i=0 y s=0:
+#    0 <= 0 <= size (Verdadero)
+#    0 == Sumatoria vacía (Verdadero)
+#    -> La invariante se cumple al inicio.
+
+# l) Verificación CP1 -> CP1 (Preservación):
+#    Hipótesis: s_viejo es la suma de 0 a i_viejo-1.
+#    Operación: s_nuevo = s_viejo + array[i_viejo].
+#    Resultado: s_nuevo es ahora la suma de 0 a i_viejo.
+#    Como i_nuevo es i_viejo + 1, la fórmula se mantiene para el nuevo estado.
+
+# m) Verificación CP1 -> Fin (Return):
+#    El bucle termina cuando la condición (i < size) es falsa -> (i >= size).
+#    Por la Invariante sabemos que (i <= size).
+#    Conclusión: i debe ser exactamente igual a array.size().
+#    Sustituyendo en la Invariante: s es la suma total de 0 a size-1.
+#    -> La función retorna el valor correcto.

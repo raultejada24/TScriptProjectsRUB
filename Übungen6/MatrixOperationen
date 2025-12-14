@@ -1,0 +1,173 @@
+# --- PARTE A: Definición de la Clase y Accesores ---
+
+class Matrix2by2 {
+	public:
+    var data;
+    constructor() {
+        # Inicializamos un array plano de 4 elementos (2x2) con ceros
+        this.data = [0, 0, 0, 0];
+    }
+}
+
+# Calcula el índice lineal para una matriz 2x2 dado [fila, columna]
+function index(matrix, indices) {
+    # indices[0] es fila, indices[1] es columna
+    # Fórmula: fila * ancho + columna
+    return indices[0] * 2 + indices[1];
+}
+
+function get(matrix, indices) {
+    return matrix.data[index(matrix, indices)];
+}
+
+function set(matrix, indices, value) {
+    matrix.data[index(matrix, indices)] = value;
+}
+
+# --- PARTE B: Salida Formateada ---
+
+function printMatrix(mat) {
+    if Type(mat) != Matrix2by2 then error("Type must be Matrix2by2");
+    
+    # Imprimimos fila por fila
+    print(get(mat, [0,0]) + "\t" + get(mat, [0,1]));
+    print(get(mat, [1,0]) + "\t" + get(mat, [1,1]));
+    print("----------------");
+}
+
+# --- PARTE F & G: Constructores Auxiliares (Zeros e Identity) ---
+
+function zeros() {
+    var m = Matrix2by2();
+    # El constructor ya inicializa en 0, pero por claridad:
+    return m;
+}
+
+function identity() {
+    var m = Matrix2by2();
+    set(m, [0,0], 1.0); set(m, [0,1], 0.0);
+    set(m, [1,0], 0.0); set(m, [1,1], 1.0);
+    return m;
+}
+
+# --- PARTE C & E: Multiplicación con Manejo de Errores ---
+
+function multiply(matA, matB) {
+    # e) Verificación de Tipos (Guard Clauses)
+    if Type(matA) != Matrix2by2 then 
+        error("Parameter 1: Type must be Matrix2by2, found " + Type(matA));
+    if Type(matB) != Matrix2by2 then 
+        error("Parameter 2: Type must be Matrix2by2, found " + Type(matB));
+
+    var result = zeros();
+
+    # Algoritmo de multiplicación de matrices
+    # C[i][k] = Sum(A[i][j] * B[j][k])
+    # Como es 2x2 fija, hacemos bucles de 0 a 1
+    for var i in 0:2 do {
+        for var k in 0:2 do {
+            var sum = 0.0;
+            for var j in 0:2 do {
+                var aVal = get(matA, [i, j]);
+                var bVal = get(matB, [j, k]);
+                sum = sum + (aVal * bVal);
+            }
+            set(result, [i, k], sum);
+        }
+    }
+    return result;
+}
+
+# --- PARTE H: Inversión ---
+
+function invert(mat) {
+    if Type(mat) != Matrix2by2 then error("Type must be Matrix2by2");
+
+    var a = get(mat, [0,0]);
+    var b = get(mat, [0,1]);
+    var c = get(mat, [1,0]);
+    var d = get(mat, [1,1]);
+
+    # Determinante: ad - bc
+    var det = (a * d) - (b * c);
+
+    # Chequeo de determinante cero (con pequeña tolerancia)
+    if math.abs(det) < 1e-10 then error("Matrix is singular (not invertible)");
+
+    var invDet = 1.0 / det;
+    var result = zeros();
+
+    # Fórmula: (1/det) * [d, -b; -c, a]
+    set(result, [0,0], d * invDet);
+    set(result, [0,1], -b * invDet);
+    set(result, [1,0], -c * invDet);
+    set(result, [1,1], a * invDet);
+
+    return result;
+}
+
+# --- PARTE I: Igualdad (Equal) ---
+
+function equal(matA, matB) {
+    if Type(matA) != Matrix2by2 or Type(matB) != Matrix2by2 then return false;
+
+    var epsilon = 1e-4; # Tolerancia de 10^-4
+
+    for var i in 0:4 do {
+        var diff = math.abs(matA.data[i] - matB.data[i]);
+        if diff >= epsilon then return false;
+    }
+    return true;
+}
+
+# --- PARTE J & K: Unit Tests ---
+
+function test_multiply() {
+    print("Running Unit Tests for Matrix Operations...");
+
+    # 1. Test del ejemplo dado (A * B = C)
+    var A = Matrix2by2();
+    set(A, [0,0], 1); set(A, [0,1], 3);
+    set(A, [1,0], -2); set(A, [1,1], 2);
+
+    var B = Matrix2by2();
+    set(B, [0,0], 0); set(B, [0,1], 1);
+    set(B, [1,0], -1); set(B, [1,1], 1);
+
+    var expectedC = Matrix2by2();
+    set(expectedC, [0,0], -3); set(expectedC, [0,1], 4);
+    set(expectedC, [1,0], -2); set(expectedC, [1,1], 0);
+
+    var calcC = multiply(A, B);
+    
+    # Assert es el mecanismo para testing: si falla, detiene el programa.
+    assert(equal(calcC, expectedC), "Test Failed: A * B != C");
+    print("  [OK] Example Multiplication A * B");
+
+    # 2. Test Identidad (A * I = A)
+    var I = identity();
+    var AI = multiply(A, I);
+    assert(equal(AI, A), "Test Failed: A * I != A");
+    print("  [OK] Identity Multiplication");
+
+    # 3. Test Inversa (A * inv(A) = I)
+    var invA = invert(A);
+    var resIdentity = multiply(A, invA);
+    assert(equal(resIdentity, I), "Test Failed: A * inv(A) != I");
+    print("  [OK] Inverse Multiplication");
+
+    # 4. Test Matriz Nula (A * Z = Z)
+    var Z = zeros();
+    var AZ = multiply(A, Z);
+    assert(equal(AZ, Z), "Test Failed: A * Z != Z");
+    print("  [OK] Zero Matrix Multiplication");
+    
+    # 5. Prueba de tipos (Descomentar para probar error)
+    # multiply(A, 5); 
+
+    print("All tests passed successfully!");
+}
+
+# --- Programa Principal ---
+
+test_multiply();
