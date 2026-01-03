@@ -1,0 +1,157 @@
+class Bitstring
+{
+public:
+    var bits;
+
+    constructor(value)
+    {
+        this.bits = [];
+        if Type(value) == Boolean then
+        {
+            for var i in 0:48 do
+            {
+                this.bits.push(value);
+            }
+        }
+        else if Type(value) == Bitstring then
+        {
+            for var i in 0:48 do
+            {
+                this.bits.push(value.get(i));
+            }
+        }
+        else
+        {
+            throw "Constructor expects Boolean or Bitstring";
+        }
+    }
+
+    function get(k)
+    {
+        # PRIMERO: Comprobamos el tipo. Si no es entero, lanzamos error y SALIMOS.
+        if Type(k) != Integer then throw "Index must be an Integer";
+        # SEGUNDO: Ahora es seguro comprobar el rango.
+        if k < 0 or k >= 48 then throw "Index out of bounds";
+        
+        return this.bits[k];
+    }
+
+    function set(k)
+    {
+        if Type(k) != Integer then throw "Index must be an Integer";
+        if k < 0 or k >= 48 then throw "Index out of bounds";
+        
+        this.bits[k] = true;
+    }
+
+    function clear(k)
+    {
+        if Type(k) != Integer then throw "Index must be an Integer";
+        if k < 0 or k >= 48 then throw "Index out of bounds";
+        
+        this.bits[k] = false;
+    }
+
+    function bitand(other)
+    {
+        if Type(other) != Bitstring then throw "Argument must be Bitstring";
+        for var i in 0:48 do
+        {
+            this.bits[i] = this.bits[i] and other.get(i);
+        }
+    }
+
+    function bitor(other)
+    {
+        if Type(other) != Bitstring then throw "Argument must be Bitstring";
+        for var i in 0:48 do
+        {
+            this.bits[i] = this.bits[i] or other.get(i);
+        }
+    }
+
+    function bitxor(other)
+    {
+        if Type(other) != Bitstring then throw "Argument must be Bitstring";
+        for var i in 0:48 do
+        {
+            this.bits[i] = (this.bits[i] != other.get(i));
+        }
+    }
+
+    function bitnot()
+    {
+        for var i in 0:48 do
+        {
+            this.bits[i] = not this.bits[i];
+        }
+    }
+
+    function str()
+    {
+        var s = "";
+        for var i in 0:48 do
+        {
+            if this.bits[i] then s = s + "1";
+            else s = s + "0";
+        }
+        return s;
+    }
+}
+
+# ======================================
+# TESTS
+# ======================================
+
+print("--- Start Tests ---");
+
+var a = Bitstring(false);
+a.set(0);
+a.set(47);
+print("Test A (Expect 1...1): " + a.str());
+
+var b = Bitstring(a);
+b.clear(0);
+print("Test B (Expect 0...1): " + b.str());
+
+var c = Bitstring(true);
+c.clear(0);
+var d = Bitstring(false);
+d.set(1);
+
+c.bitand(d);
+# El resultado dependerá de la lógica, aquí probamos que no falle
+
+print("--- Exception Tests ---");
+
+# Prueba de rango
+try
+{
+    a.get(50);
+}
+catch var e do
+{
+    print("Caught expected range error: " + e);
+}
+
+# Prueba de tipo en constructor
+try
+{
+    var bad = Bitstring(123);
+}
+catch var e do
+{
+    print("Caught expected constructor error: " + e);
+}
+
+# Prueba de tipo inválido en get (la que fallaba antes)
+try
+{
+    a.get("foo");
+}
+catch var e do
+{
+    print("Caught expected type error: " + e);
+}
+
+print("--- Tests Finished ---");
