@@ -1,0 +1,79 @@
+# ==========================================
+# UBUNGSBLATT 7 - AUFGABE 1: SORTIEREN
+# ==========================================
+
+# --- Parte a) Implementación ---
+
+# Función auxiliar para barajar (dada por el ejercicio)
+function shuffleArraySlice(array, begin, end)
+{
+    for var i in begin:end do
+    {
+        # Genera índice aleatorio
+        var j = begin + Integer((i - begin + 1) * math.random());
+        
+        # Intercambio (swap)
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+# Algoritmo de ordenamiento "Naive Random Sort"
+function randomSort(a) {
+    var n = a.size(); 
+    var k = n;
+
+    # Mientras queden elementos por ordenar (desde el final hacia el principio)
+    while k > 0 do {
+        
+        # 1. Encontrar el máximo actual en el rango 0:k
+        var m = a[0];
+        for var i in 0:k do {
+            if a[i] > m then m = a[i];
+        }
+
+        # 2. Bucle: Barajar hasta que el máximo 'm' esté en la posición k-1
+        # La condición es: mientras a[k-1] sea MENOR que m, sigue barajando.
+        while a[k-1] < m do {
+            shuffleArraySlice(a, 0, k);
+        }
+
+        # Una vez el máximo está colocado al final del rango (en k-1), reducimos el rango
+        k = k - 1;
+    }
+    return a;
+}
+
+# --- Zona de Pruebas ---
+# var testArr = [3, 1, 4, 1, 5, 9, 2];
+# print("Original: " + testArr);
+# randomSort(testArr);
+# print("Ordenado: " + testArr);
+
+
+# ==========================================
+# RESPUESTAS TEÓRICAS (COMENTADAS)
+# ==========================================
+
+# b) Probabilidad de éxito (P):
+#    Para un rango de tamaño k, la probabilidad de que el máximo caiga 
+#    en la posición k-1 tras un shuffle aleatorio es:
+#    P = 1 / k
+
+# c) Número esperado de intentos:
+#    Es una distribución geométrica con probabilidad P.
+#    Esperanza E = 1 / P = k.
+#    Se espera que el bucle interno corra 'k' veces.
+
+# d) Laufzeit (Big O):
+#    - Coste por iteración de k: O(k) [buscar max] + (k intentos * O(k) [shuffle])
+#    - Coste por iteración = O(k^2)
+#    - Sumatorio de k=1 hasta n de k^2 es aprox n^3/3.
+#    - Complejidad Total Esperada: O(n^3)
+
+# e) Comparación:
+#    - Este algoritmo: O(n^3) (Muy lento)
+#    - Bubble/Insertion Sort: O(n^2) (Lentos)
+#    - Merge/Quick Sort: O(n log n) (Rápidos)
+#    Conclusión: Es mucho peor que los algoritmos estándar.

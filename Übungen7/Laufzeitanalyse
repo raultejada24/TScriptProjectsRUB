@@ -1,0 +1,89 @@
+# ==========================================
+# UBUNGSBLATT 7 - AUFGABE 0: LAUFZEITANALYSE
+# ==========================================
+
+# --- Parte a) ---
+# Función: Encontrar el elemento mínimo.
+# Análisis: Recorre el array una sola vez elemento por elemento.
+# Complejidad: O(n) -> Lineal.
+function minElement(array) {
+    var min = array[0];
+    # El bucle recorre todos los elementos 'e' en 'array'
+    for var e in array do {
+        if e < min then min = e;
+    }
+    return min;
+}
+
+# --- Parte b) ---
+# Función: Tabla de multiplicaciones.
+# Análisis: Tiene dos bucles anidados. El exterior se ejecuta n veces
+# y el interior también se ejecuta n veces por cada iteración del exterior.
+# Cálculo: n * n = n^2
+# Complejidad: O(n^2) -> Cuadrática.
+function multiplications(n) {
+    for var i in 0:n do {
+        for var k in 0:n do {
+            print(i + " * " + k + " = " + i*k);
+        }
+    }
+}
+
+# --- Parte c) ---
+# Función: Logaritmo base 2 (aproximado/conteo).
+# Análisis: La variable 'i' se multiplica por 2 en cada paso.
+# El número de pasos necesarios para llegar a 'n' es log2(n).
+# Complejidad: O(log n) -> Logarítmica.
+function easyLog2(n) {
+    var i = 1;
+    var count = 0;
+    while i < n do {
+        count += 1;
+        i *= 2; # El paso se duplica
+    }
+    return count;
+}
+
+# --- Parte d) ---
+# Función: Suma de Gauss (1 a n).
+# Análisis: Usa una fórmula matemática directa. 
+# Siempre realiza el mismo número de operaciones aritméticas.
+# Complejidad: O(1) -> Constante.
+function sum1toN(n) {
+    return n*(n+1)/2;
+}
+
+# --- Parte e) ---
+# Función: Conversación aburrida.
+# Análisis:
+# 1. Primer bucle: Calcula k = 2^n.
+# 2. Segundo bucle: Se ejecuta k veces (2^n veces).
+# Complejidad: O(2^n) -> Exponencial.
+function boringConversation(n) {
+    var k = 2;
+    for var i in 0:n do {
+        k *= 2;
+    }
+    
+    for var j in 0:k do {
+        print("Bla bla bla");
+    }
+}
+
+# --- Parte f) ---
+# Tarea: Escribir una función con complejidad O(n * log n).
+# Solución: Bucle externo n veces (Lineal) * Bucle interno log(n) veces.
+function myNLogExample(n) {
+    var totalOps = 0;
+    
+    # Bucle externo: corre n veces -> O(n)
+    for var i in 0:n do {
+        var x = 1;
+        # Bucle interno: x se duplica -> O(log n)
+        while x < n do {
+            x *= 2;
+            totalOps += 1;
+        }
+    }
+    return totalOps;
+}
