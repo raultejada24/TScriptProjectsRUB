@@ -72,7 +72,7 @@ while true do
 	var w = winner();
 	if w != "" then
 	{
-		if w == "draw" then alert("Unentschieden");
+		if w == "draw" then alert("Draw");
 		else alert("Spieler " + w + " gewinnnt!");
 		break;
 	}

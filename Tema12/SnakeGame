@@ -11,13 +11,13 @@ print("Haz clic en START para comenzar");
 print("");
 
 # Configuración del canvas
-var W = canvas.width();
-var H = canvas.height();
+var w = canvas.width();
+var h = canvas.height();
 
 # Configuración del juego
 var gridSize = 20;
-var cols = math.floor(W / gridSize);
-var rows = math.floor(H / gridSize);
+var cols = math.floor(w / gridSize);
+var rows = math.floor(h / gridSize);
 
 # Estados del juego: "menu", "playing", "paused", "gameover"
 var gameState = "menu";
@@ -98,13 +98,13 @@ function drawGrid()
 	for var i in 0:cols do
 	{
 		var x = i * gridSize;
-		canvas.line(x, 0, x, H);
+		canvas.line(x, 0, x, h);
 	}
 	
 	for var i in 0:rows do
 	{
 		var y = i * gridSize;
-		canvas.line(0, y, W, y);
+		canvas.line(0, y, w, y);
 	}
 }
 
@@ -198,7 +198,7 @@ function drawHUD()
 	# Barra superior semitransparente
 	canvas.setFillColor(0, 0, 0);
 	canvas.setOpacity(0.7);
-	canvas.fillRect(0, 0, W, barHeight);
+	canvas.fillRect(0, 0, w, barHeight);
 	canvas.setOpacity(1);
 	
 	# Puntuación actual
@@ -209,11 +209,11 @@ function drawHUD()
 	
 	# High Score
 	canvas.setTextAlign("right");
-	canvas.text(W - padding, 5, "High: " + highScore);
+	canvas.text(w - padding, 5, "High: " + highScore);
 	
 	# Longitud
 	canvas.setTextAlign("center");
-	canvas.text(W/2, 5, "Longitud: " + snake.size());
+	canvas.text(w/2, 5, "Longitud: " + snake.size());
 }
 
 # ======================================
@@ -222,35 +222,35 @@ function drawHUD()
 function drawMenu()
 {
 	# Fondo con degradado
-	for var y in 0:H do
+	for var y in 0:h do
 	{
-		var gradient = y / H;
+		var gradient = y / h;
 		canvas.setFillColor(0.1 + gradient * 0.2, 0.3 + gradient * 0.4, 0.1 + gradient * 0.2);
-		canvas.fillRect(0, y, W, 1);
+		canvas.fillRect(0, y, w, 1);
 	}
 	
 	# Título
 	canvas.setFillColor(1, 1, 0);
 	canvas.setFont("Helvetica", 60);
 	canvas.setTextAlign("center");
-	canvas.text(W/2, H/2 - 60, "SNAKE GAME");
+	canvas.text(w/2, h/2 - 60, "SNAKE GAME");
 	
 	# Subtítulo
 	canvas.setFillColor(1, 1, 1);
 	canvas.setFont("Helvetica", 24);
-	canvas.text(W/2, H/2, "Haz clic para comenzar");
+	canvas.text(w/2, h/2, "Haz clic para comenzar");
 	
 	# Controles
 	canvas.setFont("Helvetica", 18);
-	canvas.text(W/2, H/2 + 40, "Controles: ⬆️ ⬇️ ⬅️ ➡️");
-	canvas.text(W/2, H/2 + 65, "ESPACIO para pausar");
+	canvas.text(w/2, h/2 + 40, "Controles: ⬆️ ⬇️ ⬅️ ➡️");
+	canvas.text(w/2, h/2 + 65, "ESPACIO para pausar");
 	
 	# High Score
 	if highScore > 0 then
 	{
 		canvas.setFillColor(1, 0.8, 0);
 		canvas.setFont("Helvetica", 20);
-		canvas.text(W/2, H/2 + 100, "High Score: " + highScore);
+		canvas.text(w/2, h/2 + 100, "High Score: " + highScore);
 	}
 }
 
@@ -262,17 +262,17 @@ function drawPaused()
 	# Overlay semitransparente
 	canvas.setFillColor(0, 0, 0);
 	canvas.setOpacity(0.5);
-	canvas.fillRect(0, 0, W, H);
+	canvas.fillRect(0, 0, w, h);
 	canvas.setOpacity(1);
 	
 	# Texto de pausa
 	canvas.setFillColor(1, 1, 1);
 	canvas.setFont("Helvetica", 48);
 	canvas.setTextAlign("center");
-	canvas.text(W/2, H/2 - 20, "PAUSA");
+	canvas.text(w/2, h/2 - 20, "PAUSA");
 	
 	canvas.setFont("Helvetica", 20);
-	canvas.text(W/2, H/2 + 20, "Presiona ESPACIO para continuar");
+	canvas.text(w/2, h/2 + 20, "Presiona ESPACIO para continuar");
 }
 
 # ======================================
@@ -283,33 +283,33 @@ function drawGameOver()
 	# Overlay
 	canvas.setFillColor(0, 0, 0);
 	canvas.setOpacity(0.8);
-	canvas.fillRect(0, 0, W, H);
+	canvas.fillRect(0, 0, w, h);
 	canvas.setOpacity(1);
 	
 	# Game Over
 	canvas.setFillColor(1, 0, 0);
 	canvas.setFont("Helvetica", 56);
 	canvas.setTextAlign("center");
-	canvas.text(W/2, H/2 - 60, "GAME OVER");
+	canvas.text(w/2, h/2 - 60, "GAME OVER");
 	
 	# Estadísticas
 	canvas.setFillColor(1, 1, 1);
 	canvas.setFont("Helvetica", 28);
-	canvas.text(W/2, H/2, "Puntuación: " + score);
-	canvas.text(W/2, H/2 + 35, "Longitud: " + snake.size());
+	canvas.text(w/2, h/2, "Puntuación: " + score);
+	canvas.text(w/2, h/2 + 35, "Longitud: " + snake.size());
 	
 	# Nuevo récord
 	if score == highScore and score > 0 then
 	{
 		canvas.setFillColor(1, 1, 0);
 		canvas.setFont("Helvetica", 24);
-		canvas.text(W/2, H/2 + 70, "🎉 ¡NUEVO RÉCORD! 🎉");
+		canvas.text(w/2, h/2 + 70, "🎉 ¡NUEVO RÉCORD! 🎉");
 	}
 	
 	# Instrucciones
 	canvas.setFillColor(0.8, 0.8, 0.8);
 	canvas.setFont("Helvetica", 20);
-	canvas.text(W/2, H/2 + 110, "Haz clic para jugar de nuevo");
+	canvas.text(w/2, h/2 + 110, "Haz clic para jugar de nuevo");
 }
 
 # ======================================
@@ -375,7 +375,7 @@ function render()
 {
 	# Fondo
 	canvas.setFillColor(0.95, 0.95, 0.95);
-	canvas.fillRect(0, 0, W, H);
+	canvas.fillRect(0, 0, w, h);
 	
 	if gameState == "menu" then
 	{
@@ -469,10 +469,10 @@ function onMouseDown(event)
 
 function onResize(event)
 {
-	W = event.width;
-	H = event.height;
-	cols = math.floor(W / gridSize);
-	rows = math.floor(H / gridSize);
+	w = event.width;
+	h = event.height;
+	cols = math.floor(w / gridSize);
+	rows = math.floor(h / gridSize);
 	render();
 }
 
