@@ -1,0 +1,35 @@
+var centerX = 0;
+var centerY = 0;
+var waitingForCorner = false;
+
+function onMouseDown(event)
+{
+    if waitingForCorner == false then {
+        centerX = event.x;
+        centerY = event.y;
+        
+        canvas.circle(centerX, centerY, 3);
+        
+        waitingForCorner = true;
+        
+    } else {
+        var cornerX = event.x;
+        var cornerY = event.y;
+        
+        var halfWidth = math.abs(cornerX - centerX);
+        var halfHeight = math.abs(cornerY - centerY);
+        
+        var width = 2 * halfWidth;
+        var height = 2 * halfHeight;
+       
+        var left = centerX - halfWidth;
+        var top = centerY - halfHeight;
+        
+        canvas.rect(left, top, width, height);
+       
+        waitingForCorner = false;
+    }
+}
+setEventHandler("canvas.mousedown", onMouseDown);
+setEventHandler("canvas.keydown", function(event) {quitEventMode();});
+enterEventMode();

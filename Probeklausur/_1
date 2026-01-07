@@ -1,0 +1,71 @@
+class Student
+{
+public:
+    constructor(firstname_, lastname_, id_)
+    {
+        firstname = firstname_;
+        lastname = lastname_;
+        id = id_;
+    }
+    var firstname;
+    var lastname;
+    var id;
+};
+
+function sort(students)
+{
+    # Usamos students.sort pasando una función anónima de comparación
+    students.sort(function(a, b) {
+        
+        # 1. Primer criterio: Apellido (lastname)
+        if (a.lastname < b.lastname) return -1;
+        if (a.lastname > b.lastname) return 1;
+        
+        # Si no se devolvió nada, los apellidos son iguales.
+        # 2. Segundo criterio: Nombre (firstname)
+        if (a.firstname < b.firstname) return -1;
+        if (a.firstname > b.firstname) return 1;
+        
+        # Si llegamos aquí, nombre y apellido son iguales.
+        # 3. Tercer criterio: ID (matrikelnummer) ascendente
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+        
+        # Son idénticos
+        return 0;
+    });
+
+    return students;
+    
+}
+
+
+
+############################################################
+############################################################
+
+# Esta es la funcion de comparacion auxiliar
+function compareStudents(a, b)
+{
+    # 1. Comparar Apellidos
+    if a.lastname < b.lastname then return -1;
+    if a.lastname > b.lastname then return 1;
+
+    # Si llegamos aqui, los apellidos son iguales.
+    # 2. Comparar Nombres
+    if a.firstname < b.firstname then return -1;
+    if a.firstname > b.firstname then return 1;
+
+    # Si llegamos aqui, nombres y apellidos son iguales.
+    # 3. Comparar ID (Matrikelnummer)
+    if a.id < b.id then return -1;
+    else return 1;
+}
+
+# Esta es la funcion principal que pide el ejercicio
+function sort(students)
+{
+    # Pasamos la funcion compareStudents como parametro (sin parentesis)
+    students.sort(compareStudents);
+    return students;
+}

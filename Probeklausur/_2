@@ -1,0 +1,14 @@
+function tree(size, length)
+{
+	
+	if size > 0 then {
+		turtle.move(length);
+		turtle.turn(-45);
+		tree(size - 2, length * 0.6);
+		turtle.turn(90);
+		tree(size - 1, length * 0.6);
+		turtle.turn(-45);
+		turtle.move(-length);
+		
+	}
+}

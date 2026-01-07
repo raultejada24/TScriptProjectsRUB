@@ -1,0 +1,46 @@
+# Numero de bucles = length(alphabet) ^ n
+
+
+function sequences(n, alphabet)
+{
+    # 1. Convertimos el alfabeto en array de letras para evitar el problema de los numeros ASCII
+    var letters = alphabet.split("");
+    
+    # 2. Inicializamos con la cadena vacia
+    var results = [];
+    results.push("");
+
+    # 3. SEGURIDAD: Si n es 0, devolvemos [""] directamente
+    if n == 0 then return results;
+
+    # 4. Bucle WHILE: Mientras la longitud de la primera cadena sea menor que n, seguimos añadiendo letras
+    # Usamos results[0].size() para saber la longitud actual.
+    while results[0].size() < n do {
+        
+        var newCombinations = [];
+
+        # Recorremos las cadenas actuales
+        for var s in results do {
+            
+            # Añadimos cada letra del alfabeto
+            for var char in letters do {
+                newCombinations.push(s + char);
+            }
+        }
+
+        # Guardamos el resultado de esta vuelta
+        results = newCombinations;
+    }
+
+    return results;
+}
+
+# --- PRUEBAS ---
+print("Test 1 (Debe salir AAA, AAB...):");
+print(sequences(3, "AB"));
+
+print("Test 2 (Debe salir 77, 78...):");
+print(sequences(2, "789"));
+
+print("Test 3 (Debe salir [] o vacío):");
+print(sequences(0, "XYZ"));
