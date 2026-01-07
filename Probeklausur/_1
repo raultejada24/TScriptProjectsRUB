@@ -18,18 +18,18 @@ function sort(students)
     students.sort(function(a, b) {
         
         # 1. Primer criterio: Apellido (lastname)
-        if (a.lastname < b.lastname) return -1;
-        if (a.lastname > b.lastname) return 1;
+        if (a.lastname < b.lastname) then return -1;
+        if (a.lastname > b.lastname) then return 1;
         
         # Si no se devolvió nada, los apellidos son iguales.
         # 2. Segundo criterio: Nombre (firstname)
-        if (a.firstname < b.firstname) return -1;
-        if (a.firstname > b.firstname) return 1;
+        if (a.firstname < b.firstname) then return -1;
+        if (a.firstname > b.firstname) then return 1;
         
         # Si llegamos aquí, nombre y apellido son iguales.
         # 3. Tercer criterio: ID (matrikelnummer) ascendente
-        if (a.id < b.id) return -1;
-        if (a.id > b.id) return 1;
+        if (a.id < b.id) then return -1;
+        if (a.id > b.id) then return 1;
         
         # Son idénticos
         return 0;
