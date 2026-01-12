@@ -1,0 +1,117 @@
+# ==========================================
+# UBUNGSBLATT 8 - AUFGABE 1: ALGEBRA BOOLEANA
+# ==========================================
+
+# --- Parte a) Disjunktive Normalform (DNF) ---
+#
+# Teoría: La DNF (Suma de Productos) se forma mirando solo las filas donde y = 1.
+# Para cada fila, creamos un término "AND" (Minterm). Si la variable es 0, se niega.
+#
+# Filas donde y = 1:
+# 1. A=1, B=0, C=1 -> (A and not B and C)
+# 2. A=0, B=1, C=1 -> (not A and B and C)
+# 3. A=0, B=1, C=0 -> (not A and B and not C)
+# 4. A=0, B=0, C=1 -> (not A and not B and C)
+#
+# Fórmula DNF completa:
+# f = (A ∧ ¬B ∧ C) ∨ (¬A ∧ B ∧ C) ∨ (¬A ∧ B ∧ ¬C) ∨ (¬A ∧ ¬B ∧ C)
+
+# --- Parte b) Verificación en TScript (DNF) ---
+
+function checkDNF() {
+    print("--- Verificando DNF ---");
+    # Probamos una combinación específica, por ejemplo A=1, B=0, C=1 (Debe dar 1)
+    var A = true;
+    var B = false;
+    var C = true;
+
+    # Implementación de la fórmula obtenida en 'a'
+    var term1 = (A and not B and C);
+    var term2 = (not A and B and C);
+    var term3 = (not A and B and not C);
+    var term4 = (not A and not B and C);
+    
+    var y = term1 or term2 or term3 or term4;
+
+    print("Entrada: A=" + A + ", B=" + B + ", C=" + C);
+    print("Resultado y: " + y); 
+    # Debería imprimir 'true' para este caso.
+}
+
+# --- Parte c) Simplificación ---
+#
+# Objetivo: Simplificar la expresión usando leyes distributivas.
+#
+# Expresión original:
+# y = (A ∧ ¬B ∧ C) ∨ (¬A ∧ B ∧ C) ∨ (¬A ∧ B ∧ ¬C) ∨ (¬A ∧ ¬B ∧ C)
+#
+# Paso 1: Reordenar para agrupar términos similares.
+# Vamos a agrupar el 1º con el 4º, y el 2º con el 3º.
+# y = [(A ∧ ¬B ∧ C) ∨ (¬A ∧ ¬B ∧ C)]  ∨  [(¬A ∧ B ∧ C) ∨ (¬A ∧ B ∧ ¬C)]
+#
+# Paso 2: Factorizar (Distributiva inversa).
+# Grupo 1: Tienen en común (¬B ∧ C)
+#    -> (¬B ∧ C) ∧ (A ∨ ¬A)
+# Grupo 2: Tienen en común (¬A ∧ B)
+#    -> (¬A ∧ B) ∧ (C ∨ ¬C)
+#
+# Paso 3: Aplicar Identidad (x ∨ ¬x = 1) y (x ∧ 1 = x).
+#    -> (¬B ∧ C) ∧ 1   ∨   (¬A ∧ B) ∧ 1
+#    -> (¬B ∧ C) ∨ (¬A ∧ B)
+#
+# Resultado Simplificado:
+# y = (¬B ∧ C) ∨ (¬A ∧ B)
+
+function checkSimplified() {
+    print("--- Verificando Simplificación ---");
+    # Probamos A=0, B=1, C=0. En la tabla original da 1.
+    var A = false; 
+    var B = true; 
+    var C = false;
+
+    # Fórmula simplificada
+    var y = (not B and C) or (not A and B);
+    
+    print("Entrada: 0, 1, 0 -> Esperado: true");
+    print("Resultado: " + y);
+}
+
+# --- Parte d) Konjunktive Normalform (KNF) ---
+#
+# Teoría: La KNF (Producto de Sumas) se forma mirando las filas donde y = 0.
+# Para cada fila, creamos un término "OR" (Maxterm). 
+# IMPORTANTE: Aquí se invierte la lógica. Si la variable es 1, se niega en el término.
+#
+# Filas donde y = 0:
+# 1. A=1, B=1, C=1 -> (¬A ∨ ¬B ∨ ¬C)  <-- Queremos que esto dé 0 si todos son 1
+# 2. A=1, B=1, C=0 -> (¬A ∨ ¬B ∨ C)
+# 3. A=1, B=0, C=0 -> (¬A ∨ B ∨ C)
+# 4. A=0, B=0, C=0 -> (A ∨ B ∨ C)
+#
+# Fórmula KNF completa (Unimos los grupos con AND):
+# f = (¬A ∨ ¬B ∨ ¬C) ∧ (¬A ∨ ¬B ∨ C) ∧ (¬A ∨ B ∨ C) ∧ (A ∨ B ∨ C)
+
+# --- Parte e) Verificación en TScript (KNF) ---
+
+function checkKNF() {
+    print("--- Verificando KNF ---");
+    # Probamos un caso que debe dar falso: A=1, B=1, C=1 -> y=0
+    var A = true;
+    var B = true;
+    var C = true;
+
+    var term1 = (not A or not B or not C);
+    var term2 = (not A or not B or C);
+    var term3 = (not A or B or C);
+    var term4 = (A or B or C);
+
+    var y = term1 and term2 and term3 and term4;
+
+    print("Entrada: 1, 1, 1 -> Esperado: false");
+    print("Resultado: " + y);
+}
+
+# Ejecutar pruebas (simulado)
+# checkDNF();
+# checkSimplified();
+# checkKNF();

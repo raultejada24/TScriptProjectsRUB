@@ -1,0 +1,130 @@
+# ==========================================
+# UBUNGSBLATT 8 - AUFGABE 0: ZWEIERKOMPLEMENT
+# Tema: Representación de enteros con signo (4 bits)
+# ==========================================
+
+
+# --- Parte a) ---
+# Pregunta: ¿Cuántos números diferentes se pueden representar con 4 bits?
+# Análisis: Con n bits, las combinaciones posibles son 2^n.
+# Cálculo: 2^4 = 16.
+# Respuesta: Se pueden representar 16 números diferentes.
+
+
+# --- Parte b) ---
+# Pregunta: ¿Idea del complemento a dos y ventajas?
+# Análisis:
+# 1. Idea: El bit más significativo (MSB, el de la izquierda) tiene peso negativo.
+#    En 4 bits: el primer bit vale -8, los otros valen +4, +2, +1.
+# 2. Ventajas:
+#    - El cero es único (no existe +0 y -0 como en Signo y Magnitud).
+#    - La aritmética (suma y resta) funciona igual para números con y sin signo;
+#      la CPU no necesita circuitos separados para sumar positivos o negativos.
+
+
+# --- Parte c) ---
+# Pregunta: Mayor y menor número representable con 4 bits.
+# Análisis:
+# - Menor: El bit de signo activado (negativo) y el resto en 0.
+#   Binario: 1000 -> Decimal: -8
+# - Mayor: El bit de signo desactivado (positivo) y el resto en 1.
+#   Binario: 0111 -> Decimal: 4 + 2 + 1 = 7
+# Respuesta: Mínimo: -8, Máximo: 7.
+
+
+# --- Parte d) ---
+# Pregunta: Fórmula para n bits.
+# Respuesta:
+#   Mínimo: -(2^(n-1))
+#   Máximo:  (2^(n-1)) - 1
+
+
+# --- Parte e) ---
+# Tarea: Calcular 3 + 2 en binario.
+# Conversión:
+#   3 (dec) -> 0011 (bin)
+#   2 (dec) -> 0010 (bin)
+#
+# Suma:
+#     0011  (3)
+#   + 0010  (2)
+#   ------
+#     0101
+#
+# Reconversión:
+#   0101 -> bit de signo es 0 (positivo) -> 4 + 1 = 5.
+# Resultado: 5 (Correcto).
+
+# --- Parte f) ---
+# Tarea: Calcular -4 + 6 en binario.
+# Conversión:
+#   4 es 0100. Invertir bits -> 1011. Sumar 1 -> 1100.
+#   -4 (dec) -> 1100 (bin)
+#    6 (dec) -> 0110 (bin)
+#
+# Suma:
+#     1100  (-4)
+#   + 0110  ( 6)
+#   ------
+#    10010  <- ¡Hay carry out (acarreo) en el bit 5!
+#
+# Análisis: En complemento a dos, ignoramos el acarreo que se sale de los n bits.
+#   Resultado recortado a 4 bits: 0010.
+# Reconversión:
+#   0010 -> 2.
+# Resultado: 2 (Correcto, pues -4 + 6 = 2).
+
+
+# --- Parte g) ---
+# Tarea: Calcular -4 + (-3) en binario.
+# Conversión:
+#   -4 (dec) -> 1100 (ver paso anterior)
+#   Para -3: 3 es 0011. Invertir -> 1100. Sumar 1 -> 1101.
+#   -3 (dec) -> 1101
+#
+# Suma:
+#     1100  (-4)
+#   + 1101  (-3)
+#   ------
+#    11001  <- Acarreo fuera del rango.
+#
+# Análisis: Ignoramos el quinto bit. Nos queda 1001.
+# Reconversión:
+#   1001 -> El bit de signo es 1 (es negativo).
+#   Para saber la magnitud: Invertir (0110) y sumar 1 -> 0111 (7).
+#   Por lo tanto es -7.
+# Resultado: -7 (Correcto, pues -4 - 3 = -7).
+
+
+# --- Parte h) ---
+# Pregunta: ¿Cómo se realiza una resta (A - B)?
+# Respuesta:
+#   La resta se realiza sumando el número negativo: A + (-B).
+#   Pasos:
+#   1. Invertir todos los bits del sustraendo (B).
+#   2. Sumarle 1 al resultado (esto convierte B en -B).
+#   3. Sumar este resultado a A normalmente.
+
+
+# --- Parte i) ---
+# Tarea: Calcular 5 + 4 en binario.
+# Conversión:
+#   5 (dec) -> 0101
+#   4 (dec) -> 0100
+#
+# Suma:
+#     0101  (5)
+#   + 0100  (4)
+#   ------
+#     1001
+#
+# Reconversión:
+#   1001 -> Bit de signo es 1 (Negativo).
+#   Magnitud: Invertir (0110) + 1 = 0111 (7).
+#   Resultado interpretado por la máquina: -7.
+#
+# Problema: 5 + 4 = 9, pero el resultado dio -7.
+# Conclusión: OVERFLOW (Desbordamiento).
+#   Con 4 bits con signo, el máximo es 7. El número 9 no cabe,
+#   por lo que "da la vuelta" e invade los números negativos.
+#   (Regla: Si sumas dos positivos y sale negativo, hubo Overflow).
