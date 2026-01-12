@@ -1,0 +1,5 @@
+# Numero Aleatorio del 1 al 100
+for 1:20 do
+	print(math.round(math.random() * 100));
+	
+# RANGO = n:n+1
