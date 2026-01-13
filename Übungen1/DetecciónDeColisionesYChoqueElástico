@@ -97,7 +97,7 @@ function elasticCollision(v1_before, v2_before, s1, s2)
 # g,h) Bucle principal: loop que hace 1000 iteraciones
 #     - Usamos for con rango 0:999 para tener exactamente 1000 iteraciones
 # ==========================
-for var step in 0:999 do
+for var step in 1:1001 do
 {
     # ==========================
     # i) Orden de operaciones dentro del bucle:

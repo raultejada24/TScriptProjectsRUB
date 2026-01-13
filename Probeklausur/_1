@@ -18,8 +18,8 @@ function sort(students)
     students.sort(function(a, b) {
         
         # 1. Primer criterio: Apellido (lastname)
-        if (a.lastname < b.lastname) then return -1;
-        if (a.lastname > b.lastname) then return 1;
+        if (a.lastname < b.lastname) then return -1; # No hacer nada
+        if (a.lastname > b.lastname) then return 1; # Intercambiarlos
         
         # Si no se devolvió nada, los apellidos son iguales.
         # 2. Segundo criterio: Nombre (firstname)
