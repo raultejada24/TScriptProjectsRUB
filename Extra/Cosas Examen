@@ -1,3 +1,5 @@
+# Einfach, Mittel, Anspruchsvoll
+
 # Numero Aleatorio del 1 al 100
 for 1:4 do
 	print(math.round(math.random() * 100));
@@ -31,7 +33,7 @@ print("===========");
 var miDiccionario = {"bananas": 10, "manzanas": 5, "peras": 20};
 
 # 1. Coger las keys
-var llaves = miDiccionario.keys(); // ["bananas", "manzanas", "peras"]
+var llaves = miDiccionario.keys(); # ["bananas", "manzanas", "peras"]
 
 # 2. Ordenar ese array
 llaves.sort(); # Ahora es ["bananas", "manzanas", "peras"] (o alfabético inverso según quieras)
@@ -44,10 +46,39 @@ for var k in llaves do
     print(k + " -> " + valor);
 }
 
-
-
-## Si hay multiplicación ya no es O(n) --> (x + x^1/2) * x
-## O si es exponente es mayor de 2 (Puede ser 1/2)
-
-
 ## Saber implementar MergeSort, BubbleSort, InsertionSort y CombSort
+
+
+## Bit Masken
+var x = 2;
+var n = 3;              # Posición del bit
+var mask = 2^n;         # La Máscara (el "puntero" al bit n)
+
+# 1. LEER (Extract)
+# Borra todo menos el bit n. Si el resultado > 0, es true.
+var check = x and mask;
+
+# 2. ENCENDER (Set)
+# Fuerza el bit n a ser 1 (true).
+var turnOn = x or mask;
+
+# 3. APAGAR (Clear)
+# Invierte la máscara y fuerza el bit n a ser 0.
+var turnOff = x and (not mask);
+
+# 4. TOGGLE (Invertir) - Extra
+# Si era 0 pasa a 1, si era 1 pasa a 0.
+var toggle = x xor mask; 
+
+# 5. MOVER BITS (Shift)
+var goLeft  = x * mask;   # Empuja bits a la izquierda (<<)
+var goRight = x // mask;  # Empuja bits a la derecha (>>)
+
+# 6. LEER (Estilo Aritmético)
+# Mueve el bit a la derecha del todo y mira si es impar.
+# Resultado: true o false (Booleano).
+var checkBool = (x // 2^n) % 2 == 1;
+
+## Ejercicio: Mantisse und Exponent (Descomponer en mantisa, ...)
+
+
