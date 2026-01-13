@@ -1,5 +1,53 @@
 # Numero Aleatorio del 1 al 100
-for 1:20 do
+for 1:4 do
 	print(math.round(math.random() * 100));
 	
 # RANGO = n:n+1
+
+## Ejemplo Bucles recursivo (Aufgabe: Umwandlung in Rekursion (Tema 7))
+function rec(i, j)
+{
+	print(i + " * " + j + " = " + (i*j));
+	if j < i then rec(i, j+1);
+	else if i < 5 then rec(i+1, 1);
+}
+rec(1, 1);
+
+## Iterar en array por posiciones 0,1,2,..
+var a = [16, true, "hello"];
+function printvalues_(a)
+{
+    if Type(a) == Array
+    then for var e in 0:a.size() do printvalues_(a[e]); 
+    else print(a);
+}
+printvalues_(a);
+
+print("===========");
+
+## Iterar en array por contenido (en el ejemplo de abajo for var k in llaves do)
+
+## Ordenar un Dictionary
+var miDiccionario = {"bananas": 10, "manzanas": 5, "peras": 20};
+
+# 1. Coger las keys
+var llaves = miDiccionario.keys(); // ["bananas", "manzanas", "peras"]
+
+# 2. Ordenar ese array
+llaves.sort(); # Ahora es ["bananas", "manzanas", "peras"] (o alfabético inverso según quieras)
+
+# 3. Iterar el array ordenado
+for var k in llaves do
+{
+    #Aquí está el truco: usas 'k' (la llave), no el array entero
+    var valor = miDiccionario[k]; 
+    print(k + " -> " + valor);
+}
+
+
+
+## Si hay multiplicación ya no es O(n) --> (x + x^1/2) * x
+## O si es exponente es mayor de 2 (Puede ser 1/2)
+
+
+## Saber implementar MergeSort, BubbleSort, InsertionSort y CombSort
