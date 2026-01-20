@@ -1,0 +1,140 @@
+# ==========================================
+# EXERCISE 7 - TASK 1: STACK ADT
+# ==========================================
+
+class Stack {
+    # Encapsulation: The data array is private.
+    # No one outside can mess with the array indices directly.
+    private:
+        var m_data;
+
+    public:
+        # Constructor: Initializes the empty stack
+        constructor() {
+            m_data = [];
+        }
+
+        # --- Part c) Operations ---
+
+        # 1. empty(): Returns true if stack is empty, else false
+        function empty() {
+            if (m_data.size() == 0) then {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        # 2. push(x): Adds an element to the top
+        function push(x) {
+            # In TScript, 'push' adds to the end of the array.
+            # We treat the end of the array as the "Top" of the stack.
+            m_data.push(x);
+        }
+
+        # 3. pop(): Removes and returns the top element
+        function pop() {
+            if (this.empty()) then {
+                print("Error: Stack is empty! Cannot pop.");
+                return null;
+            }
+            # 'pop' removes the last element (the top)
+            return m_data.pop();
+        }
+
+        # 4. print_stack(): Prints from Top to Bottom
+        function print_stack() {
+            print("--- Stack Content (Top to Bottom) ---");
+            if (this.empty()) then {
+                print("(Empty)");
+                return;
+            }
+
+            # We need to iterate backwards (from size-1 down to 0)
+            # because the end of the array is the top of the stack.
+            var k = m_data.size() - 1;
+            while (k >= 0) do {
+                print(m_data[k]);
+                k = k - 1;
+            }
+            print("-------------------------------------");
+        }
+
+        # --- Part d) Reverse Function ---
+        # Returns a NEW Stack object with elements in reverse order.
+        # Since we are inside the class, we can access m_data.
+        function reverse() {
+            var newStack = Stack();
+            
+            # Logic: 
+            # If current stack (Top->Bottom) is: [C, B, A]
+            # Reversed stack should be: [A, B, C]
+            # To achieve this, we read our internal array from the BEGINNING (Bottom)
+            # and push those items into the new stack.
+            
+            # Example:
+            # m_data = [A, B, C] (C is Top)
+            # Loop: Push A, then B, then C into newStack.
+            # newStack m_data will be [A, B, C]. 
+            # Wait! If newStack has [A, B, C], then C is Top.
+            # The top is still C. That's a COPY, not a reverse.
+            
+            # CORRECT LOGIC:
+            # We want the OLD Bottom (A) to be the NEW Top.
+            # So we must push C, then B, then A into the new stack?
+            # If we push C, newStack is [C].
+            # If we push B, newStack is [C, B]. (B is top)
+            # If we push A, newStack is [C, B, A]. (A is top)
+            # Correct! A is now the top.
+            
+            # So we iterate backwards through our own data.
+            var k = m_data.size() - 1;
+            while (k >= 0) do {
+                newStack.push(m_data[k]);
+                k = k - 1;
+            }
+
+            return newStack;
+        }
+}
+
+# ==========================================
+# TESTING ZONE
+# ==========================================
+
+# 1. Create a Stack
+var myStack = Stack();
+
+# 2. Test Empty
+print("Is stack empty? " + myStack.empty()); # Expected: true
+
+# 3. Push elements
+print("Pushing: 10, 20, 30");
+myStack.push(10);
+myStack.push(20);
+myStack.push(30);
+
+# 4. Print (Should see 30, 20, 10)
+myStack.print_stack();
+
+# 5. Test Pop
+var val = myStack.pop();
+print("Popped element: " + val); # Expected: 30
+myStack.print_stack(); # Should see 20, 10
+
+# 6. Test Reverse
+print("Restoring stack for reverse test...");
+myStack.push(30); 
+myStack.push(40); 
+# Current: Top [40, 30, 20, 10] Bottom
+myStack.print_stack();
+
+print("Creating reversed stack...");
+var reversedStack = myStack.reverse();
+# Expected Reversed: Top [10, 20, 30, 40] Bottom
+
+print("Reversed Stack:");
+reversedStack.print_stack();
+
+print("Original Stack (should be unchanged):");
+myStack.print_stack();

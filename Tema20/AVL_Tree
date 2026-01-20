@@ -1,0 +1,137 @@
+class Node
+{
+public:
+    constructor(key)
+    {
+        m_key = key;
+    }
+    function str()
+    {
+        var s = "";
+        if m_left != null then s += "(" + m_left.str() + ") ";
+        s += m_key;
+        if m_right != null then s += " (" + m_right.str() + ")";
+        return s;
+    }
+    var m_key;
+    var m_left, m_right;
+}
+
+function buildTree(arr)
+{
+    if arr.size() == 0 then return null;
+
+    # Definimos la prioridad de colores dentro de la función para que sea seguro copiarla sola
+    var colors = ["braun", "schwarz", "pink", "grau", "gelb", "blau", "rot"];
+    
+    var root = Node(arr[0]);
+
+    # Iteramos por el resto de elementos del array empezando desde el índice 1
+    for var i in 1:arr.size() do {
+        var keyToInsert = arr[i];
+        var current = root;
+        
+        # Parseamos el elemento que queremos insertar
+        var partsIn = keyToInsert.split(" ");
+        var colIn = partsIn[0];
+        var valIn = Integer(partsIn[1]);
+        
+        # Buscamos la prioridad del color a insertar
+        var idxIn = -1;
+        for var k in 0:colors.size() do {
+            if colors[k] == colIn then idxIn = k;
+        }
+
+        # Bucle infinito para bajar por el árbol hasta encontrar hueco o duplicado
+        while true do {
+            # Parseamos el nodo actual contra el que comparamos
+            var partsCur = current.m_key.split(" ");
+            var colCur = partsCur[0];
+            var valCur = Integer(partsCur[1]);
+
+            # Buscamos la prioridad del color del nodo actual
+            var idxCur = -1;
+            for var k in 0:colors.size() do {
+                if colors[k] == colCur then idxCur = k;
+            }
+
+            # Lógica de comparación
+            var goLeft = false;
+            var goRight = false;
+            var isDuplicate = false;
+
+            if idxIn < idxCur then goLeft = true;
+            else if idxIn > idxCur then goRight = true;
+            else {
+                # Mismo color: comparamos números
+                if valIn < valCur then goLeft = true;
+                else if valIn > valCur then goRight = true;
+                else isDuplicate = true; # Idénticos
+            }
+
+            if isDuplicate then break; # Es duplicado, salimos sin hacer nada
+
+            if goLeft then {
+                if current.m_left == null then {
+                    current.m_left = Node(keyToInsert);
+                    break; # Insertado, pasamos al siguiente del array
+                } else {
+                    current = current.m_left;
+                }
+            } 
+            else if goRight then {
+                if current.m_right == null then {
+                    current.m_right = Node(keyToInsert);
+                    break; # Insertado, pasamos al siguiente del array
+                } else {
+                    current = current.m_right;
+                }
+            }
+        }
+    }
+
+    return root;
+}
+
+# ==========================================================
+# =================== ZONA DE PRUEBAS ======================
+# ==========================================================
+
+print("=== INICIANDO PRUEBAS ===");
+
+# TEST 1: El del enunciado
+print("Test 1 (Enunciado):");
+var t1 = buildTree(["braun 12", "gelb 11", "blau 18", "gelb 11", "gelb 3"]);
+if t1 != null then print(t1.str());
+print("Esperado: braun 12 ((gelb 3) gelb 11 (blau 18))");
+print("-----------------------------");
+
+# TEST 2: Array vacío
+print("Test 2 (Vacío):");
+var t2 = buildTree([]);
+if t2 == null then print("Pass (es null)");
+else print("Fail: " + t2.str());
+print("-----------------------------");
+
+# TEST 3: Colores (Prioridad estricta)
+# braun(0) < schwarz(1) < pink(2)
+print("Test 3 (Colores):");
+var t3 = buildTree(["pink 1", "schwarz 1", "braun 1"]);
+if t3 != null then print(t3.str());
+print("Esperado: ((braun 1) schwarz 1) pink 1");
+print("-----------------------------");
+
+# TEST 4: Números y Duplicados
+# Mismo color, orden numérico, ignorar repetidos
+print("Test 4 (Num & Dups):");
+var t4 = buildTree(["rot 50", "rot 10", "rot 100", "rot 50"]);
+if t4 != null then print(t4.str());
+print("Esperado: (rot 10) rot 50 (rot 100)");
+print("-----------------------------");
+
+# TEST 5: Complejo mezclado
+print("Test 5 (Complejo):");
+var t5 = buildTree(["braun 1", "grau 2", "pink 1", "grau 1"]);
+if t5 != null then print(t5.str());
+print("Esperado: braun 1 ((pink 1 (grau 1)) grau 2)");
+print("-----------------------------");

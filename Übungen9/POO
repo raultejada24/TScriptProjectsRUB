@@ -1,0 +1,132 @@
+# ==========================================
+# EXERCISE 7 - TASK 0: OOP (Animal, Dog, Fish)
+# ==========================================
+
+# --- Part a) Class Definition ---
+class Animal {
+    # --- Part c) Private Attributes ---
+    # "Rule of thumb": Attributes are private to ensure encapsulation.
+private:
+    var m_name;
+    var m_color;
+    var m_numberOfLegs;
+
+    # --- Part d) Constructor ---
+    # Use 'protected' so we cannot create a generic "Animal" directly.
+    # We can only create specific animals (subclasses).
+protected:
+    constructor(name, color, legs) {
+        m_name = name;
+        m_color = color;
+        m_numberOfLegs = legs;
+    }
+
+public:
+    # --- Part e) Getter ---
+    function getName() {
+        return m_name;
+    }
+
+    # --- Part f) Print Description ---
+    function print_description() {
+        print("My name is " + m_name + ", I have " + m_numberOfLegs + " legs and I am " + m_color + ".");
+    }
+}
+
+# --- Part g) Class Dog (Inheritance) ---
+class Dog : Animal {
+    # --- Part h) Private ID ---
+    private:
+    var m_id;
+
+    # --- Part i) Constructor ---
+    public:
+    constructor(name, color, id):super(name, color, 4) {
+        # Call the superclass constructor.
+        # Hardcoded 4 legs as requested.
+        m_id = id;
+    }
+
+    # --- Part j) Override Description ---
+    function print_description() {
+        print("I am a dog.");
+        # Use 'super' to call the parent method
+        super.print_description();
+        print("My ID code is: " + m_id);
+    }
+
+    # --- Part k) Introduce ---
+    function introduce() {
+        # Note: m_name is private in Animal, so Dog cannot access it directly.
+        # We MUST use the public getter method getName().
+        print("Hello! My name is " + super.getName() + ". Woof! And what is your name?");
+    }
+}
+
+# --- Part l) Class Fish ---
+class Fish : Animal {
+    private:
+    var m_needsSaltWater;
+
+    public:
+    constructor(name, color, needsSalt):super(name, color, 0) {
+        # Fish usually have 0 legs
+        m_needsSaltWater = needsSalt;
+    }
+
+    # --- Part m) Override Description ---
+    function print_description() {
+        print("I am a fish.");
+        # Call parent description
+        super.print_description();
+
+        if (m_needsSaltWater) then {
+            print("I live in saltwater.");
+        } else {
+            print("I live in freshwater.");
+        }
+    }
+}
+
+# --- Part n) Creativity / Extension ---
+# Let's add a "Cat" that is mostly annoyed.
+class Cat : Animal {
+    public:
+    constructor(name, color):super(name, color, 4) {
+    }
+
+    function print_description() {
+        print("I am a cat.");
+        super.print_description();
+    }
+
+    function meow() {
+        print(super.getName() + " says: Meow. Leave me alone.");
+    }
+}
+
+# ==========================================
+# MAIN / TESTING ZONE
+# ==========================================
+
+print("--- Testing Dog ---");
+# Creating a Dog: Name "Bello", Color "Brown", ID 12345
+var myDog = Dog("Bello", "brown", 12345);
+myDog.print_description();
+print("---");
+myDog.introduce();
+
+print("");
+print("--- Testing Fish ---");
+# Creating a Fish: Name "Nemo", Color "Orange", Saltwater (true)
+var myFish = Fish("Nemo", "orange", true);
+myFish.print_description();
+
+print("");
+print("--- Testing Creative Extension (Cat) ---");
+var myCat = Cat("Garfield", "orange");
+myCat.meow();
+
+# Error Checking (Theoretical):
+# var unknown = Animal("Thing", "Grey", 10);
+# This line above would cause an error because the Animal constructor is protected.
