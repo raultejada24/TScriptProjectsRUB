@@ -1,0 +1,224 @@
+# =============================================================
+# HOJA 10 - TAREA 0: Refactorización FINAL (Sin errores de visibilidad)
+# =============================================================
+
+# -------------------------------------------------------------
+# CLASE BASE: GameObject
+# -------------------------------------------------------------
+class GameObject {
+
+    public: static var s_objects = [];
+
+    protected:
+    var m_x;
+    var m_y;
+    var m_visible;
+
+    protected: function isNumber(x) {
+        return Type(x) == Integer or Type(x) == Real;
+    }
+
+    protected: constructor(x, y) {
+        if not isNumber(x) then throw "Parameter x must be a number.";
+        if not isNumber(y) then throw "Parameter y must be a number.";
+
+        m_x = x;
+        m_y = y;
+        m_visible = true;
+
+        # Auto-registro
+        GameObject.s_objects.push(this);
+    }
+
+    public: function toggleVisibility() {
+        m_visible = not m_visible;
+    }
+
+    # --- CORRECCIÓN IMPORTANTE ---
+    # Necesitamos una función PÚBLICA para consultar la visibilidad desde fuera.
+    public: function isVisible() {
+        return m_visible;
+    }
+
+    public: function update() {
+        if (m_visible) then {
+            this.draw(); 
+        }
+    }
+
+    public: function draw() {}
+    
+    public: function getTypeString() { return "GameObject"; }
+}
+
+# -------------------------------------------------------------
+# SUBCLASE: STONE
+# -------------------------------------------------------------
+class Stone : GameObject {
+    private:
+    var m_size;
+
+    public: constructor(x, y, size) : super(x, y) {
+        if not isNumber(size) then throw "Parameter size must be a number.";
+        m_size = size;
+    }
+
+    public: function draw() {
+        canvas.setFillColor(0.4, 0.4, 0.4);
+        canvas.fillCircle(m_x, m_y, m_size);
+    }
+    
+    public: function getTypeString() { return "Stone"; }
+}
+
+# -------------------------------------------------------------
+# SUBCLASE: PERSON
+# -------------------------------------------------------------
+class Person : GameObject {
+    private:
+    var m_velocity_x;
+    var m_name;
+
+    public: constructor(x, y, vel_x, name) : super(x, y) {
+        if not isNumber(vel_x) then throw "Parameter vel_x must be a number.";
+        m_velocity_x = vel_x;
+        m_name = name;
+    }
+
+    public: function move() {
+        m_x += m_velocity_x;
+    }
+
+    public: function draw() {
+        canvas.setFillColor(1, 1, 0);
+        canvas.fillCircle(m_x, m_y, 20);
+        canvas.setFillColor(0, 1, 1);
+        canvas.fillRect(m_x - 15, m_y + 20, 30, 50);
+        canvas.setFillColor(0, 0, 0);
+        canvas.text(m_x, m_y - 30, m_name);
+    }
+
+    public: function update() {
+        this.move();
+        super.update();
+    }
+    
+    public: function getTypeString() { return "Person (" + m_name + ")"; }
+}
+
+# -------------------------------------------------------------
+# PARTE J: CREATIVIDAD (UFO)
+# -------------------------------------------------------------
+class UFO : GameObject {
+    
+    private: 
+    var m_angle = 0;
+    var m_startY;
+
+    public: constructor(x, y) : super(x, y) {
+        m_startY = y;
+    }
+
+    public: function draw() {
+        canvas.setFillColor(0, 1, 0); 
+        canvas.fillCircle(m_x, m_y, 25);
+        canvas.setFillColor(0.5, 0, 0.5); 
+        canvas.fillCircle(m_x, m_y - 10, 15);
+    }
+
+    public: function move() {
+        m_x += 2;
+        m_angle += 0.2;
+        m_y = m_startY + math.sin(m_angle) * 30;
+        if (m_x > canvas.width()) then m_x = 0;
+    }
+
+    public: function update() {
+        this.move();
+        super.update();
+    }
+    
+    public: function getTypeString() { return "UFO"; }
+}
+
+# -------------------------------------------------------------
+# PROGRAMA PRINCIPAL
+# -------------------------------------------------------------
+
+# Objetos iniciales
+var s = Stone(100, 150, 25);
+var p1 = Person(100, 100, 1, "Ada Lovelace");
+var p2 = Person(200, 100, -0.2, "Konrad Zuse");
+
+# -------------------------------------------------------------
+# EVENT HANDLERS
+# -------------------------------------------------------------
+
+setEventHandler("timer", function(event){
+    canvas.setFillColor(1, 1, 1);
+    canvas.clear();
+
+    for var obj in GameObject.s_objects do {
+        obj.update();
+    }
+});
+
+setEventHandler("canvas.keydown", function(event){
+    
+    # --- LOGS PARA VISIBILIDAD ---
+    if (event.key >= "0" and event.key <= "9") then {
+        var index = Integer(event.key);
+        if (index < GameObject.s_objects.size()) then {
+            var obj = GameObject.s_objects[index];
+            obj.toggleVisibility();
+            
+            # CORRECCIÓN: Usamos la función pública isVisible() en vez de acceder a m_visible
+            var status = "HIDDEN";
+            if (obj.isVisible()) then status = "VISIBLE";
+            
+            print("[ACTION] Toggled Object " + index + " (" + obj.getTypeString() + ") -> Now " + status);
+        } else {
+            print("[ERROR] Object " + index + " does not exist yet!");
+        }
+    }
+
+    # --- LOGS PARA CREAR OBJETOS ---
+    if (event.key == "n") then {
+        var r = math.random();
+        var rx = math.random() * canvas.width();
+        var ry = 100 + math.random() * 300;
+        
+        var newObj = null;
+
+        if (r < 0.33) then {
+            newObj = Person(rx, ry, (math.random()-0.5)*4, "Random Guy");
+        } else if (r < 0.66) then {
+            newObj = Stone(rx, ry, 10 + math.random() * 20);
+        } else {
+            newObj = UFO(0, 100);
+        }
+        
+        var currentCount = GameObject.s_objects.size();
+        var newIndex = currentCount - 1; 
+        
+        print("[ACTION] Created new " + newObj.getTypeString() + " at index [" + newIndex + "]");
+    }
+});
+
+# -------------------------------------------------------------
+# MENÚ INICIAL
+# -------------------------------------------------------------
+print("=========================================");
+print("   GAME STARTED - LOGGED FIX v2          ");
+print("=========================================");
+print(" Current Objects:");
+print(" [0] Stone");
+print(" [1] Person (Ada Lovelace)");
+print(" [2] Person (Konrad Zuse)");
+print("-----------------------------------------");
+print(" CONTROLS:");
+print(" > Press 'n'   : Create a random object");
+print(" > Press '0'-'9': Toggle visibility");
+print("=========================================");
+
+enterEventMode();
