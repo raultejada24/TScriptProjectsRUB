@@ -1,0 +1,255 @@
+# Name: Raul Tejada Merinero
+# Matrikelnummer: 108025228145
+
+class Bot {
+public:
+    var game;
+    var target_position = {
+        "rotation": 0,
+        "column": 1
+    };
+    var speed = 1000;
+
+    var previous_time;
+
+    constructor(game){
+        this.game = game;
+        this.previous_time = localtime();
+    }
+
+    function timer(){
+        if this.game.tetromino.just_spawned then {
+            this.target_position = this.get_position();
+            this.game.tetromino.just_spawned = false;
+            this.speed = this.game.gravity;
+        }
+
+        if localtime() - this.previous_time >= speed then {
+            this.previous_time = localtime();
+
+            if this.target_position["rotation"] == this.game.tetromino.rotation then {
+                if this.target_position["column"] > this.game.tetromino.column then {
+                    # Simulate the event directly as a dictionary to avoid needing the external Event class
+                    this.game.keydown({"key": this.game.controls["move_right"]});
+                }
+                if this.target_position["column"] < this.game.tetromino.column then {
+                    this.game.keydown({"key": this.game.controls["move_left"]});
+                }
+            }
+            else {
+                if this.target_position["rotation"] == 3 then {
+                    this.game.keydown({"key": this.game.controls["rotate_counter_clockwise"]});
+                }
+                else {
+                    this.game.keydown({"key": this.game.controls["rotate_clockwise"]});
+                }
+            }
+        }
+        this.game.timer();
+    }
+
+    # --- TASK 2: LOOKAHEAD AND RECURSION ---
+    function get_position(){
+        # Evaluate 2 pieces: the current one and the next one (lookahead)
+        var pieces = [
+            this.game.tetromino.copy(),
+            Tetromino(this.game.pool.next)
+        ];
+
+        # Initial call to the recursive search function
+        var best_move = this.search(this.game.playfield, pieces, 0);
+
+        if best_move == null then return {"column": 1, "rotation": 0};
+        return best_move;
+    }
+
+    # Recursive function that explores all possible moves
+    function search(playfield, pieces, depth) {
+        var tetromino = pieces[depth].copy();
+        var valid_positions = [];
+
+        for var rot in 0:tetromino.max_rotations do {
+            for var col in 0:playfield.blockmap[0].size() do {
+                var pf_copy = Playfield(playfield.blockmap[0].size()-2, playfield.blockmap.size()-2);
+                pf_copy.blockmap = deepcopy(playfield.blockmap);
+
+                tetromino.column = col;
+                tetromino.rotation = rot;
+
+                if pf_copy.check_collision(tetromino) then continue;
+
+                while not pf_copy.check_collision(tetromino) do {
+                    tetromino.drop();
+                }
+                tetromino.undo();
+
+                pf_copy.insert_tetromino(tetromino);
+                pf_copy.remove_full_rows(tetromino.row);
+
+                var current_move_score;
+
+                # Recursive step: If there are still pieces left to evaluate in the array
+                if depth < pieces.size() - 1 then {
+                    var future_best = this.search(pf_copy, pieces, depth + 1);
+                    if future_best != null then {
+                        current_move_score = future_best["score"];
+                    } else {
+                        current_move_score = {"score": 999999}; 
+                    }
+                } 
+                # Base case: All pieces have been evaluated, score the final board state
+                else {
+                    current_move_score = this.score(pf_copy, tetromino);
+                }
+
+                valid_positions.push({
+                    "column": col,
+                    "rotation": rot,
+                    "score": current_move_score
+                });
+            }
+        }
+
+        if valid_positions.size() == 0 then return null;
+
+        var optimal_position = valid_positions[0];
+        for var pos in valid_positions do {
+            if optimal_position["score"]["score"] > pos["score"]["score"] then optimal_position = pos;
+        }
+
+        return optimal_position;
+    }
+
+    function score(playfield, tetromino){
+        var weights = {
+            "max_height": 1,
+            "holes": 20,
+            "roughness": 1/3,
+            "aggregate_height": 2, 
+            "blockades": 5         
+        };
+
+        return {
+            "max_height": weights["max_height"] * this.max_height(playfield),
+            "holes": weights["holes"] * this.holes(playfield),
+            "roughness": weights["roughness"] * this.roughness(playfield),
+            "aggregate_height": weights["aggregate_height"] * this.aggregate_height(playfield),
+            "blockades": weights["blockades"] * this.blockades(playfield),
+            "score": weights["max_height"] * this.max_height(playfield)
+                 + weights["holes"] * this.holes(playfield)
+                 + weights["roughness"] * this.roughness(playfield)
+                 + weights["aggregate_height"] * this.aggregate_height(playfield)
+                 + weights["blockades"] * this.blockades(playfield)
+        };
+    }
+
+    # --- TASK 1: HEURISTICS ---
+
+    # Heuristic 1: aggregate_height
+    # What it measures: Sums up the heights of all columns on the board.
+    # Why it improves the bot: It encourages the bot to keep the board as flat and low as possible, preventing the formation of dangerous tall towers.
+    # Normalization: Yes [0, 1]. The total sum is divided by (width * max_height), which represents the theoretical maximum area it could fill.
+    function aggregate_height(playfield){
+        var total_height = 0;
+        var max_h = playfield.blockmap.size() - 2;
+        var width = playfield.blockmap[0].size() - 2;
+
+        for var col in 1:width do {
+            for var row in 1:max_h do {
+                if playfield.blockmap[row][col] != 0 then {
+                    total_height += (playfield.blockmap.size() - row - 1);
+                    break;
+                }
+            }
+        }
+        return total_height / (width * max_h);
+    }
+
+    # Heuristic 2: blockades
+    # What it measures: Counts solid blocks that are directly above at least one empty hole in the same column.
+    # Why it improves the bot: It heavily penalizes creating "roofs" over holes. A covered hole is lethal because the bot cannot clear it without destroying all the blocks above it first.
+    # Normalization: Yes [0, 1]. It is divided by (width * max_height) to guarantee the return value is bounded between 0 and 1.
+    function blockades(playfield){
+        var blockades_count = 0;
+        var max_h = playfield.blockmap.size() - 2;
+        var width = playfield.blockmap[0].size() - 2;
+
+        for var col in 1:width do {
+            var blocks_above = 0;
+            for var row in 1:max_h do {
+                if playfield.blockmap[row][col] != 0 then {
+                    blocks_above += 1;
+                } else {
+                    if playfield.blockmap[row][col] == 0 and blocks_above > 0 then {
+                        blockades_count += blocks_above;
+                        blocks_above = 0; 
+                    }
+                }
+            }
+        }
+        return blockades_count / (width * max_h);
+    }
+
+    # --- ORIGINAL HEURISTICS ---
+
+    function roughness(playfield){
+        var heights = [];
+        for var col_idx in 1:playfield.blockmap[0].size() - 1 do {
+            var flag = false;
+            for var row_idx in 1:playfield.blockmap.size() - 1 do {
+                 if playfield.blockmap[row_idx][col_idx] != 0 then {
+                     heights.push(row_idx);
+                     flag = true;
+                     break;
+                 }
+            }
+            if not flag then heights.push(playfield.blockmap.size() - 1);
+        }
+        var score = 0;
+        for var i in 0:heights.size() - 1 do {
+            score += math.abs(heights[i]-heights[i+1]);
+        }
+        return score/10;
+    }
+
+    function holes(playfield){
+        var holes = 0;
+        for var col_idx in 1:playfield.blockmap[0].size() - 1 do {
+             var flag = false;
+             for var row_idx in 1:playfield.blockmap.size() - 1 do {
+                 if playfield.blockmap[row_idx][col_idx] != 0 then flag = true;
+                 if playfield.blockmap[row_idx][col_idx] == 0 and flag then holes += 1;
+             }
+        }
+        return holes / (playfield.blockmap[0].size() * playfield.blockmap.size());
+    }
+
+    function max_height(playfield){
+        for var row in 1:playfield.blockmap.size()- 1 do {
+            for var col in 1:playfield.blockmap[row].size() - 1 do {
+                if playfield.blockmap[row][col] != 0 then {
+                    return (playfield.blockmap.size() - row)/(playfield.blockmap.size()-1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    function add_incoming_lines(num){
+        this.game.add_incoming_lines(num);
+    }
+
+    function get_outgoing_lines(){
+        return this.game.get_outgoing_lines();
+    }
+
+    function reset_outgoing_lines(){
+        this.game.reset_outgoing_lines();
+    }
+
+    function keyup(event){
+    }
+    
+    function keydown(event){
+    }
+}
